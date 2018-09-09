@@ -1,0 +1,33 @@
+<% include ../partials/header %>
+<div class="row">
+   <h1 class="text-center">Edit <%=landscape.name%></h1>
+   <div class="div-center"">
+      <form action="/landscapes/<%= landscape._id %>?_method=PUT" method="POST">
+         <div class="form-group">
+            <label for="landscape-edit-name">Name:</label>
+            <input id="landscape-edit-name" class="form-control" type="text" name="landscape[name]" value="<%= landscape.name %>">
+         </div>
+         <div class="form-group">
+            <label for="landscape-edit-price">Entrance Fee:</label>
+            <input id="landscape-edit-price" class="form-control" type="number" name="landscape[entranceFee]" value="<%= landscape.entranceFee %>" min="0.1" step="0.1">
+         </div>
+         <div class="form-group">
+            <label for="landscape-edit-image">Image:</label>
+            <input id="landscape-edit-image" class="form-control" type="text" name="landscape[image]" value="<%= landscape.image %>">
+         </div>
+         <div class="form-group">
+            <label for="landscape-edit-location">Location:</label>
+            <input id="landscape-edit-location" class="form-control" type="text" name="landscape[location]" value="<%= landscape.location %>">
+         </div>
+         <div class="form-group">
+            <label for="landscape-edit-description">Description:</label>
+            <textarea class="form-control" name="landscape[description]" id="landscape-edit-description" rows="5" ><%= landscape.description %></textarea>
+         </div>
+         <div class="form-group">
+            <button class="btn btn-primary btn-lg btn-block">Edit</button>
+         </div>
+      </form>
+      <a href="/landscapes/<%= landscape._id %>">Go Back</a>
+   </div>      
+</div>
+<% include ../partials/footer %>

@@ -1,0 +1,17 @@
+<% include ../partials/header %> 
+<div class="row">
+   <h1 class="text-center">Edit Comment</h1>
+   <div class="div-center"">
+      <form action="/landscapes/<%= landscape_id %>/comments/<%= comment._id %>?_method=PUT" method="POST">
+         <div class="form-group">
+            <label for="comment-edit-text">Text:</label>
+            <input id="comment-edit-text" class="form-control" type="text" name="comment[text]" value="<%= comment.text %>">
+         </div>
+         <div class="form-group">
+            <button class="btn btn-primary btn-lg btn-block">Edit Comment</button>
+         </div>
+      </form>
+      <a href="/landscapes/<%= landscape_id %>">Go Back</a>
+   </div>      
+</div>
+<% include ../partials/footer %>

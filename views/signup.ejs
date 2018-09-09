@@ -1,0 +1,43 @@
+<% include ./partials/header.ejs %>
+<div class="row">
+  <h1 class="text-center">Sign Up</h1>
+  <div class="div-center"">
+    <a href="#" class="btn btn-block btn-social btn-facebook" style="width: 60%; margin:auto">
+        <span class="fab fa-facebook"></span> Continue with Facebook
+    </a>
+    <hr>
+    <form action="/signup" method="POST">
+      <div class="form-group">
+        <label for="signup-email">Email:</label>
+        <input id="signup-email" class="form-control" type="text" name="email" placeholder="user@email.com">
+      </div>
+      <div class="form-group">
+        <label for="signup-username">Username:</label>
+        <input id="signup-username" class="form-control" type="text" name="username" placeholder="Username">
+      </div>       
+      <div class="form-group">
+        <label for="signup-password">Password:</label>
+        <input id="signup-password" class="form-control" type="password" name="password" placeholder="Create Password">
+      </div>
+      <div class="form-group">
+        <label for="signup-fullname">Full Name: (Optional)</label>
+        <input id="signup-fullname" class="form-control" type="text" name="fullName" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label for="signup-avatar">Avatar: (Optional)</label>
+        <input id="signup-avatar" class="form-control" type="text" name="avatar" placeholder="https://www.myavatar.com/avatar.jpg">
+      </div>
+      <div class="form-group">
+        <label for="signup-admin-code">Admin Code: (Only for administrators)</label>
+        <input id="signup-admin-code" class="form-control" type="text" name="isAdmin" placeholder="Admin Code">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-lg btn-primary btn-block">Sign Up</button>
+      </div>            
+    </form>
+    <div class="login-help">
+      <a href="/login">Login</a> - <a href="/landscapes">Go Back</a>
+    </div>   
+  </div>
+</div>
+<% include ./partials/footer.ejs %>

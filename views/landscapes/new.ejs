@@ -1,0 +1,35 @@
+<% include ../partials/header %> 
+<div class="row">
+   <h1 class="text-center"">New Landscape</h1>
+   <div class="div-center"">
+      <form action="/landscapes" method="POST">
+         <div class="form-group">
+            <label for="landscape-new-name">Name:</label>
+            <input id="landscape-new-name" class="form-control" type="text" name="landscape[name]" placeholder="Yosemite National Park">
+         </div>
+         <div class="form-group">
+            <label for="landscape-new-entrance">Entrance Fee: (Optional)</label>
+            <input id="landscape-new-entrance" class="form-control" type="number" name="landscape[entranceFee]" placeholder="$20" min="0.1" step="0.1">
+         </div>
+         <div class="form-group">
+            <label for="landscape-new-image">Image URL:</label>
+            <input id="landscape-new-image" class="form-control" type="text" name="landscape[image]" placeholder="https://www.nps.gov/images/uploads/yosemite.jpg">
+         </div>
+         <div class="form-group">
+            <label for="landscape-new-location">Location:</label>
+            <input id="landscape-new-location" class="form-control" type="text" name="landscape[location]" placeholder="Yosemite National Park, California, USA">
+         </div>
+         <div class="form-group">
+            <label for="landscape-new-description">Description: (Optional)</label>
+            <textarea id="landscape-new-description" class="form-control" rows="5" name="landscape[description]" placeholder="Description"></textarea>
+         </div>
+         <div class="form-group">
+            <button class="btn btn-primary btn-lg btn-block">Add</button>
+         </div>
+      </form>
+      <div class="login-help">
+         <a href="/landscapes">Go Back</a>
+      </div>
+   </div>      
+</div>
+<% include ../partials/footer %>

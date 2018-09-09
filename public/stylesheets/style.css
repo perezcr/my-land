@@ -1,0 +1,30 @@
+.thumbnail {
+   padding: 0;
+}
+
+.thumbnail img {
+   width: 100%;
+}
+
+.thumbnail .caption {
+   padding: 9px;
+}
+
+.delete-form {
+   display: inline;
+}
+
+.div-center {
+   width: 30%;
+   margin: 25px auto;
+}
+
+#landscape-index {
+   display: flex;
+   flex-wrap: wrap;
+}
+
+#map {
+   height: 400px;
+   width: 100%;
+}

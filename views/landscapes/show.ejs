@@ -1,0 +1,82 @@
+<% include ../partials/header %>
+<div class="row">
+   <div class="col-md-3">
+      <p class="lead">MyLand</p>
+      <div class="list-group">
+         <li class="list-group-item">Entrance Fee: $<%= landscape.entranceFee %></li>
+         <li class="list-group-item"><small>Published <%= moment(landscape.createdAt).format('MMMM Do YYYY, h:mm a') %></small></li>
+      </div>
+      <div id="map"></div>
+   </div>
+   <div class="col-md-9">
+      <div class="thumbnail">
+         <img class="img-responsive" src="<%= landscape.image %>">
+         <div class="caption">
+            <h4><a><%= landscape.name %></a></h4>
+            <p> 
+               <em>
+                  Submitted By
+                  <a href="/users/<%= landscape.author.id %>"><%= landscape.author.username %></a>
+               </em>                   
+            </p>
+            <p><%= landscape.description %></p>
+            <% if(currentUser && landscape.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
+               <a class="btn btn-xs btn-warning" href="/landscapes/<%= landscape._id %>/edit">Edit</a>
+               <form class="delete-form" action="/landscapes/<%= landscape._id %>?_method=DELETE" method="POST">
+                  <button class="btn btn-xs btn-danger">Delete</button>
+               </form>
+            <% } %>          
+         </div>
+      </div>
+      <!-- COMMENT SECTION START -->
+      <div class="well">
+         <div class="text-right">
+            <a class="btn btn-success" href="/landscapes/<%=landscape._id%>/comments/new">Comment</a>
+         </div>
+         <hr>
+         <% landscape.comments.forEach((comment) => { %>
+            <div class="row">
+               <div class="col-md-12">
+                  <strong><%= comment.author.username %></strong>
+                  <span class="pull-right"><%= moment(comment.createdAt).fromNow() %></span>
+                  <p><%= comment.text %></p>
+                  <% if(currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
+                     <a class="btn btn-xs btn-warning" href="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>/edit">Edit</a>
+                     <form class="delete-form" action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                        <button class="btn btn-xs btn-danger">Delete</button>
+                     </form>
+                  <% } %> 
+               </div>        
+            </div>
+            <hr>
+         <% }); %>
+      </div>     
+   </div>
+</div>
+
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
+<link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css">
+<script async defer>
+   mapboxgl.accessToken = '<%= key %>';
+   
+   var map = new mapboxgl.Map({
+         container: 'map', // container id
+         style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
+         center: ['<%= landscape.lng %>', '<%= landscape.lat %>'], // starting position [lng, lat]
+         zoom: 8 // starting zoom
+   });
+   
+   var marker = new mapboxgl.Marker({
+      color: '#7C0A02'
+   });
+   
+   var popUp = new mapboxgl.Popup({
+      offset: 25
+   });
+   
+   popUp.setHTML('<h4><%= landscape.name %></h4>'+'<p><%= landscape.location %></p>');
+   marker.setLngLat(map.getCenter());
+   marker.setPopup(popUp);
+   marker.addTo(map);
+</script>
+<% include ../partials/footer %>
