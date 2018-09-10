@@ -78,4 +78,5 @@ app.use('/landscapes', landscapesRoutes);
 app.use('/landscapes/:id/comments', commentRoutes);
 app.use('/users', userRoutes);
 
-app.listen(3000, () => { console.log("Server has started!!"); });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => { console.log('Listening on ${ PORT }'); });
