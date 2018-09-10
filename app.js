@@ -26,7 +26,7 @@ require('dotenv').config();
 
 // Set up mongoose connection
 const devDbUrl = 'mongodb://localhost:27017/my_land';
-const mongoDB = process.env.MONGODB_UR || devDbUrl;
+const mongoDB = process.env.MONGODB_URL || devDbUrl;
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 
 // View engine setup

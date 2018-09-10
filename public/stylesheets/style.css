@@ -19,6 +19,12 @@
    margin: 25px auto;
 }
 
+.avatar {
+  display: initial;
+  width: 200px;
+  height: 200px;
+}
+
 #landscape-index {
    display: flex;
    flex-wrap: wrap;
