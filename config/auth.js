@@ -7,8 +7,8 @@ module.exports = {
   },
 
   'googleAuth': {
-    'clientID': 'ID',
-    'clientSecret': 'SECRET',
+    'clientID': process.env.APP_ID_GOOGLE,
+    'clientSecret': process.env.APP_SECRET_GOOGLE,
     'callbackURL': process.env.HOST + '/auth/google/callback'
   }
 };

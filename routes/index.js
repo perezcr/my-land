@@ -33,6 +33,11 @@ router.get('/auth/facebook', indexController.indexAuthFb);
 // Callback Facebook auth
 router.get('/auth/facebook/callback', indexController.indexAuthCallbackFb);
 
+router.get('/auth/google', indexController.indexAuthGoogle);
+
+// Callback Facebook auth
+router.get('/auth/google/callback', indexController.indexAuthCallbackGoogle);
+
 router.get('/logout', indexController.indexLogout);
 
 module.exports = router;

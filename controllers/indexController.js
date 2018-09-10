@@ -51,8 +51,21 @@ exports.indexAuthFb = passport.authenticate('facebook', {
 // Note that the URL of the callback route matches that of the callbackURL option specified when configuring the strategy.
 exports.indexAuthCallbackFb = passport.authenticate('facebook', {
   successRedirect: '/landscapes',
-  failureRedirect: 'back',
+  failureRedirect: '/login',
   failureFlash: true
+});
+
+// Send to google to do the authentication
+// 'profile' gets us their basic information including their name
+// 'email' gets their emails
+exports.indexAuthGoogle = passport.authenticate('google', { 
+  scope: ['profile', 'email'] 
+});
+
+// the callback after google has authenticated the user
+exports.indexAuthCallbackGoogle = passport.authenticate('google', {
+  successRedirect : '/landscapes',
+  failureRedirect : '/login'
 });
 
 // Display the forgot password form on GET
