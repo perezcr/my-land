@@ -2,26 +2,26 @@
 <div class="row">
    <h1 class="text-center"">New Landscape</h1>
    <div class="div-center"">
-      <form action="/landscapes" method="POST">
+      <form action="/landscapes" method="POST" autocomplete="off">
          <div class="form-group">
             <label for="landscape-new-name">Name:</label>
-            <input id="landscape-new-name" class="form-control" type="text" name="landscape[name]" placeholder="Yosemite National Park">
+            <input id="landscape-new-name" class="form-control" type="text" name="landscape[name]" placeholder="Yosemite National Park" maxlength="30" autofocus required>
          </div>
          <div class="form-group">
             <label for="landscape-new-entrance">Entrance Fee: (Optional)</label>
-            <input id="landscape-new-entrance" class="form-control" type="number" name="landscape[entranceFee]" placeholder="$20" min="0.1" step="0.1">
+            <input id="landscape-new-entrance" class="form-control" type="number" name="landscape[entranceFee]" placeholder="20" min="0.1" step="0.1">
          </div>
          <div class="form-group">
             <label for="landscape-new-image">Image URL:</label>
-            <input id="landscape-new-image" class="form-control" type="text" name="landscape[image]" placeholder="https://www.nps.gov/images/uploads/yosemite.jpg">
+            <input id="landscape-new-image" class="form-control" type="url" name="landscape[image]" placeholder="https://www.nps.gov/images/uploads/yosemite.jpg" maxlength="100" required>
          </div>
          <div class="form-group">
             <label for="landscape-new-location">Location:</label>
-            <input id="landscape-new-location" class="form-control" type="text" name="landscape[location]" placeholder="Yosemite National Park, California, USA">
+            <input id="landscape-new-location" class="form-control" type="text" name="landscape[location]" placeholder="Yosemite National Park, California, USA" maxlength="50" required>
          </div>
          <div class="form-group">
             <label for="landscape-new-description">Description: (Optional)</label>
-            <textarea id="landscape-new-description" class="form-control" rows="5" name="landscape[description]" placeholder="Description"></textarea>
+            <textarea id="landscape-new-description" class="form-control" rows="5" name="landscape[description]" placeholder="Description" maxlength="100"></textarea>
          </div>
          <div class="form-group">
             <button class="btn btn-primary btn-lg btn-block">Add</button>

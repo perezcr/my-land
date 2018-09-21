@@ -5,7 +5,7 @@
       <form action="/landscapes/<%= landscape._id %>?_method=PUT" method="POST">
          <div class="form-group">
             <label for="landscape-edit-name">Name:</label>
-            <input id="landscape-edit-name" class="form-control" type="text" name="landscape[name]" value="<%= landscape.name %>">
+            <input id="landscape-edit-name" class="form-control" type="text" name="landscape[name]" value="<%= landscape.name %>" maxlength="30" autofocus required>
          </div>
          <div class="form-group">
             <label for="landscape-edit-price">Entrance Fee:</label>
@@ -13,15 +13,15 @@
          </div>
          <div class="form-group">
             <label for="landscape-edit-image">Image:</label>
-            <input id="landscape-edit-image" class="form-control" type="text" name="landscape[image]" value="<%= landscape.image %>">
+            <input id="landscape-edit-image" class="form-control" type="text" name="landscape[image]" value="<%= landscape.image %>" maxlength="100" required>
          </div>
          <div class="form-group">
             <label for="landscape-edit-location">Location:</label>
-            <input id="landscape-edit-location" class="form-control" type="text" name="landscape[location]" value="<%= landscape.location %>">
+            <input id="landscape-edit-location" class="form-control" type="text" name="landscape[location]" value="<%= landscape.location %>" maxlength="50" required>
          </div>
          <div class="form-group">
             <label for="landscape-edit-description">Description:</label>
-            <textarea class="form-control" name="landscape[description]" id="landscape-edit-description" rows="5" ><%= landscape.description %></textarea>
+            <textarea class="form-control" name="landscape[description]" id="landscape-edit-description" rows="5" maxlength="100"><%= landscape.description %></textarea>
          </div>
          <div class="form-group">
             <button class="btn btn-primary btn-lg btn-block">Edit</button>

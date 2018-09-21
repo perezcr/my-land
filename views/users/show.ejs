@@ -36,15 +36,15 @@
                      <form action="/users/<%= user._id %>?tab=info&_method=PUT" method="POST">
                         <div class="form-group">
                            <label for="emailUser">Email:</label>
-                           <input id="emailUser" type="text" class="form-control" name="user[email]" placeholder="Email" value="<%= user.email %>">
+                           <input id="emailUser" type="email" class="form-control" name="user[email]" placeholder="Email" value="<%= user.email %>" maxlength="30" autofocus required>
                         </div>
                         <div class="form-group">
                            <label for="username">Username:</label>
-                           <input id="username" type="text" class="form-control" name="user[username]" placeholder="Username" value="<%= user.username %>">
+                           <input id="username" type="text" class="form-control" name="user[username]" placeholder="Username" value="<%= user.username %>" maxlength="30" required>
                         </div>
                         <div class="form-group">
                            <label for="fullname">Full Name:</label>
-                           <input id="fullname" type="text" class="form-control" name="user[fullname]" placeholder="Full Name" value="<%= user.fullname %>">
+                           <input id="fullname" type="text" class="form-control" name="user[fullname]" placeholder="Full Name" value="<%= user.fullname %>" maxlength="50">
                         </div>
                         <div class="form-group">
                            <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
@@ -58,15 +58,15 @@
                      <form action="/users/<%= user._id %>?tab=password&_method=PUT" method="POST">
                         <div class="form-group">
                            <label for="old">Old Password:</label>
-                           <input id="old" type="password" class="form-control" name="oldpass" placeholder="Old Password">
+                           <input id="old" type="password" class="form-control" name="oldpass" placeholder="Old Password" required>
                         </div>
                         <div class="form-group">
                            <label for="new">New Password:</label>
-                           <input id="new" type="password" class="form-control" name="newpass" placeholder="New Password">
+                           <input id="new" type="password" class="form-control" name="newpass" placeholder="New Password" required>
                         </div>
                         <div class="form-group">
                            <label for="confirm">Verify Password:</label>
-                           <input id="confirm" type="password" class="form-control" name="confirm" placeholder="Verify Password">
+                           <input id="confirm" type="password" class="form-control" name="confirm" placeholder="Verify Password" required>
                         </div>
                         <div class="form-group">
                            <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
