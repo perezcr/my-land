@@ -1,3 +1,6 @@
+if(process.env.NODE_ENV !== 'production'){
+  require('dotenv').config();
+}
 const express         = require('express');
 const path            = require('path');
 const logger          = require('morgan');
@@ -18,15 +21,13 @@ const userRoutes        = require('./routes/users');
 
 
 // Create the Express application object
-var app = express();
+const app = express();
 
 app.use(helmet());
-
-require('dotenv').config();
-
+  
 // Set up mongoose connection
 const devDbUrl = 'mongodb://localhost:27017/my_land';
-const mongoDB = process.env.MONGODB_URL || devDbUrl;
+const mongoDB = process.env.MONGODB_URLI || devDbUrl;
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 
 // View engine setup

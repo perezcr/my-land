@@ -2,7 +2,7 @@
 <div class="row">
    <h1 class="text-center"">New Landscape</h1>
    <div class="div-center"">
-      <form action="/landscapes" method="POST" autocomplete="off">
+      <form action="/landscapes" method="POST" autocomplete="off" enctype="multipart/form-data">
          <div class="form-group">
             <label for="landscape-new-name">Name:</label>
             <input id="landscape-new-name" class="form-control" type="text" name="landscape[name]" placeholder="Yosemite National Park" maxlength="30" autofocus required>
@@ -12,8 +12,8 @@
             <input id="landscape-new-entrance" class="form-control" type="number" name="landscape[entranceFee]" placeholder="20" min="0.1" step="0.1">
          </div>
          <div class="form-group">
-            <label for="landscape-new-image">Image URL:</label>
-            <input id="landscape-new-image" class="form-control" type="url" name="landscape[image]" placeholder="https://www.nps.gov/images/uploads/yosemite.jpg" maxlength="100" required>
+            <label for="landscape-new-image">Image:</label>
+            <input id="landscape-new-image" type="file" name="image" accept="image/*" required>
          </div>
          <div class="form-group">
             <label for="landscape-new-location">Location:</label>

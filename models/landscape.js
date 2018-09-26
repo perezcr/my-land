@@ -5,6 +5,7 @@ const landscapeSchema = new mongoose.Schema({
   name : { type: String, required: true },
   entranceFee: String,
   image : { type: String, required: true },
+  imageId: { type: String, required: true },
   description : String,
   location: { type: String, required: true },
   lat: Number,

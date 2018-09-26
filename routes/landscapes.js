@@ -11,7 +11,7 @@ router.get('/', landscapeController.landscapeIndex);
 router.get('/new', middleware.isLoggedIn, landscapeController.landscapeNew);
 
 // CREATE ROUTE
-router.post('/', middleware.isLoggedIn, landscapeController.landscapeCreate);
+router.post('/', middleware.isLoggedIn, landscapeController.upload.single('image'), landscapeController.landscapeCreate);
 
 // SHOW ROUTE
 router.get('/:id', landscapeController.landscapeShow);
@@ -20,7 +20,7 @@ router.get('/:id', landscapeController.landscapeShow);
 router.get('/:id/edit', middleware.checkLandscapeOwnership, landscapeController.landscapeEdit);
 
 // UPDATE ROUTE
-router.put('/:id', middleware.checkLandscapeOwnership, landscapeController.landscapeUpdate);
+router.put('/:id', middleware.checkLandscapeOwnership, landscapeController.upload.single('image'), landscapeController.landscapeUpdate);
 
 // DESTROY ROUTE  
 router.delete('/:id', middleware.checkLandscapeOwnership, landscapeController.landscapeDestroy);
