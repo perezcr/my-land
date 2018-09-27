@@ -3,17 +3,36 @@ const bcrypt   = require('bcrypt');
 
 // SCHEMA SET UP
 var userSchema = new mongoose.Schema({
-  email: { type: String, required: true },
+  email: { 
+    type: String, 
+    required: true 
+  },
+  username: { 
+    type: String, 
+    unique: true, 
+    required: true 
+  },
   password: String,
-  username: { type: String, unique: true, required: true },
   fullname: String,
   provider: String,
-  avatar: String,
+  avatar: { 
+    id: {
+      type: String,
+      default: 'default-avatar'
+    },
+    content: {
+      type: String,
+      default: 'https://res.cloudinary.com/cristian7x/image/upload/v1537990028/default-avatar.png'
+    }
+  },
   socialId: String,
   socialToken : String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,
-  isAdmin: { type: Boolean, default: false }
+  isAdmin: { 
+    type: Boolean, 
+    default: false 
+  }
 });
 
 // Generating a hash

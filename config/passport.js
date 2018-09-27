@@ -54,9 +54,8 @@ module.exports = function (passport) {
             newUser.fullname = req.body.fullname;
             newUser.provider = 'local';
             newUser.password = password;
-            newUser.avatar = req.body.avatar;
-            if (req.body.isAdmin === process.env.ADMIN_CODE) { newUser.isAdmin = true; }
-            // save the user
+            if (req.body.isAdmin === process.env.ADMIN_CODE) newUser.isAdmin = true;     
+            // Save the user
             newUser.save(function (err) {
               if (err) {
                 if (err.name === 'MongoError')
@@ -120,9 +119,9 @@ module.exports = function (passport) {
         User.findOne({ 'socialId': profile.id }, function (err, user) {
           // if there is an error, stop everything and return that
           // ie an error connecting to the database
-          if (err) { return done(err); }
+          if (err) return done(err);
           // if the user is found, then log them in
-          if (user) { return done(null, user); }
+          if (user) return done(null, user);
           else {
             // if there is no user found with that facebook id, create them
             let newUser = new User();
@@ -162,10 +161,10 @@ module.exports = function (passport) {
         User.findOne({ 'socialId': profile.id }, function (err, user) {
           // if there is an error, stop everything and return that
           // ie an error connecting to the database
-          if (err) { return done(err); }
+          if (err) return done(err);
 
           // if the user is found, then log them in
-          if (user) { return done(null, user); } 
+          if (user) return done(null, user);
           else {
             // if there is no user found with that facebook id, create them
             let newUser = new User();

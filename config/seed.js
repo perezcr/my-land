@@ -1,7 +1,7 @@
-const Landscape = require('./models/landscape');
-const Comment   = require('./models/comment');
+const Landscape = require('../models/landscape');
+const Comment   = require('../models/comment');
 
-var landscapes = [
+let landscapes = [
    {
       name : "Salmon Creek",
       entranceFee : '5.50',

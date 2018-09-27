@@ -1,5 +1,6 @@
-const User = require('../models/user');
-const Landscape = require('../models/landscape');
+const User        = require('../models/user');
+const Landscape   = require('../models/landscape');
+const cloudinary  = require('../config/cloudinary');
 
 // Display detail page for a specific user on GET
 exports.userShow = function(req, res){
@@ -24,7 +25,7 @@ exports.userUpdate = function(req, res){
   if(req.query.tab === 'password'){
     if(req.body.newpass === req.body.confirm){
       User.findById(req.params.id, (err, user) => {
-        if(err || !user){
+        if(err || !user) {
           req.flash('error', err.message);
           res.redirect('back');
         } else{
@@ -46,14 +47,37 @@ exports.userUpdate = function(req, res){
       res.redirect('back');
     }
   } else if(req.query.tab === 'info'){
-    User.findByIdAndUpdate(req.params.id, req.body.user, (err, user) => {
+    User.findById(req.params.id, function(err, user){
       if(err){
         req.flash('error', err.message);
-        res.redirect('/users/' + user._id);
-      } else{
-        req.flash('success', 'The user was updated');
-        res.redirect('/users/' + user._id);
+        return res.redirect(`/users/${user._id}`);
       }
+      user.email = req.body.email;
+      user.username = req.body.username;
+      user.fullname = req.body.fullname;
+      user.save(async function(err, user){
+        if(err){
+          req.flash('error', err.message);
+          return res.redirect('back');
+        }
+        if(req.file){
+          try {
+            if(user.avatar.id !== 'default-avatar')
+              await cloudinary.uploader.destroy(user.avatar.id);
+            let result = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/avatar'});
+            user.avatar = {
+              id: result.public_id,
+              content: result.secure_url
+            };
+            user.save();              
+          } catch(err) {
+            req.flash('error', err.message);
+            return res.redirect('back');
+          }
+        }
+        req.flash('success', 'The user was updated');
+        res.redirect(`/users/${user._id}`);
+      });
     });
   }
 };

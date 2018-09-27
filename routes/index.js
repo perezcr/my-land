@@ -1,4 +1,3 @@
-// Use express router
 const express     = require('express');
 const router      = express.Router();
 
@@ -30,12 +29,15 @@ router.post('/reset/:token', indexController.indexResetPost);
 //     /auth/facebook/callback
 router.get('/auth/facebook', indexController.indexAuthFb);
 
-// Callback Facebook auth
 router.get('/auth/facebook/callback', indexController.indexAuthCallbackFb);
 
+// Google Routes
+//
+// Redirect the user to Google for authentication. When complete,
+// Google will redirect the user back to the application at
+//     /auth/google/callback
 router.get('/auth/google', indexController.indexAuthGoogle);
 
-// Callback Facebook auth
 router.get('/auth/google/callback', indexController.indexAuthCallbackGoogle);
 
 router.get('/logout', indexController.indexLogout);

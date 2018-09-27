@@ -11,7 +11,7 @@ const passport        = require('passport');
 const methodOverride  = require('method-override');
 const compression     = require('compression');
 const helmet          = require('helmet');    
-const seedDB          = require('./seed');
+const seedDB          = require('./config/seed');
 
 // Routes
 const indexRoutes       = require('./routes/index');

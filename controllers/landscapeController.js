@@ -1,32 +1,9 @@
 const Landscape   = require('../models/landscape');
 const geocoder    = require('mapbox-geocoding');
-const multer      = require('multer');
-const cloudinary  = require('cloudinary');
+const cloudinary  = require('../config/cloudinary');
 
 // Geocoder Configuration
 geocoder.setAccessToken(process.env.GEOCODER_TOKEN);
-
-// Multer Configuration
-const storage = multer.diskStorage({
-  filename: function(req, file, callback){
-    callback(null, Date.now() + file.originalname);
-  }
-});
-const imageFilter = function(req, file, callback){
-  // accept image files only
-  if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)){
-    return callback(new Error('Only image files are allowed!'), false);
-  }
-  callback(null, true);
-};
-exports.upload = multer({ storage: storage, fileFilter: imageFilter });
-
-// Cloudinary Configuration
-cloudinary.config({
-  cloud_name: 'cristian7x',
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 // Display all landscapes on GET
 exports.landscapeIndex = function(req, res){
@@ -44,20 +21,21 @@ exports.landscapeNew = (req, res) => res.render("landscapes/new");
 
 // Handle landscape create on POST
 exports.landscapeCreate = function(req, res){
-  cloudinary.v2.uploader.upload(req.file.path, function(err, result){   
+  cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'}, function(err, result){   
     if(err){
       req.flash('error', err.message);
       return res.redirect('back');
     }
-    // add cloudinary url for the image to the campground object under image property
-    req.body.landscape.image = result.secure_url;
-    // add image's public_id to campground object
-    req.body.landscape.imageId = result.public_id;
+    // add cloudinary url for the image to the landscape object under image property
+    req.body.landscape.image = {
+      id: result.public_id,
+      content: result.secure_url
+    };
     // add author to campground
     req.body.landscape.author = {
       id: req.user._id,
       username: req.user.username
-    }
+    };
     // ****** GEOCODER ******
     // Get data from form and add to landscapes array
     geocoder.geocode('mapbox.places', req.body.landscape.location, (err, geoData) => {
@@ -113,10 +91,12 @@ exports.landscapeUpdate = function(req, res){
       }
       if(req.file){
         try {
-          await cloudinary.v2.uploader.destroy(landscape.imageId);
-          let result = await cloudinary.v2.uploader.upload(req.file.path);
-          landscape.imageId = result.public_id;
-          landscape.image = result.secure_url;
+          await cloudinary.uploader.destroy(landscape.image.id);
+          let result = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'});
+          landscape.image = {
+            id: result.public_id,
+            content: result.secure_url
+          };
         } catch(err) {
           req.flash('error', err.message);
           return res.redirect('back');
@@ -142,7 +122,7 @@ exports.landscapeDestroy = function(req, res){
       return res.redirect('/landscapes');
     }
     try {
-      await cloudinary.v2.uploader.destroy(landscape.imageId);
+      await cloudinary.uploader.destroy(landscape.image.id);
       landscape.remove();
       req.flash('success', 'The landscape was deleted');
       res.redirect('/landscapes');

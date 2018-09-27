@@ -4,105 +4,119 @@
 </div>
 <hr>
 <div class="row">
-   <div class="col-md-3 col-sm-6 col-xs-12">
-      <div class="text-center">
-          <img src="<%= user.avatar %>" class="avatar img-responsive" alt="User Profile Avatar">
-      </div>
-      <hr>
-      <% if(user.email){ %>
-         <div class="panel panel-default">
-            <div class="panel-heading"><strong>Email</strong><i class="fa fa-link fa-1x"></i></div>
-            <div class="panel-body">
-               <a href="mailto:<%= user.email %>">
-                  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                  <%= user.email %>
-               </a>
-            </div>
-         </div> 
-      <% } %>
-   </div>
+  <div class="col-md-3 col-sm-6 col-xs-12">
+    <div class="text-center">
+      <img id="avatar" src="<%= user.avatar.content %>" class="avatar img-responsive" alt="User Profile Avatar">
+      <h6>Upload a different photo...</h6>
+      <input type="file" class="center-block" name="avatar" accept="image/*" form="formInfo" onchange="readURL(this);">
+    </div>
+    <hr>
+    <% if(user.email){ %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>Email</strong><i class="fa fa-link fa-1x"></i>
+        </div>
+        <div class="panel-body">
+          <a href="mailto:<%= user.email %>">
+            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+            <%= user.email %>
+          </a>
+        </div>
+      </div> 
+    <% } %>
+  </div>
 
-   <div class="col-md-9 col-sm-6 col-xs-12">
-      <div class="row">
-         <div class="col-md-6">
-            <ul class="nav nav-tabs">
-               <li class="active"><a data-toggle="tab" href="#info">Info</a></li>
-               <li><a data-toggle="tab" href="#pass">Password</a></li>
-            </ul>
-            <hr>
-            <div class="tab-content">
-               <div class="tab-pane fade in active" id="info">
-                  <div class="row well">
-                     <form action="/users/<%= user._id %>?tab=info&_method=PUT" method="POST">
-                        <div class="form-group">
-                           <label for="emailUser">Email:</label>
-                           <input id="emailUser" type="email" class="form-control" name="user[email]" placeholder="Email" value="<%= user.email %>" maxlength="30" autofocus required>
-                        </div>
-                        <div class="form-group">
-                           <label for="username">Username:</label>
-                           <input id="username" type="text" class="form-control" name="user[username]" placeholder="Username" value="<%= user.username %>" maxlength="30" required>
-                        </div>
-                        <div class="form-group">
-                           <label for="fullname">Full Name:</label>
-                           <input id="fullname" type="text" class="form-control" name="user[fullname]" placeholder="Full Name" value="<%= user.fullname %>" maxlength="50">
-                        </div>
-                        <div class="form-group">
-                           <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
-                           <button class="btn btn-sm btn-warning" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-               <div class="tab-pane fade" id="pass">
-                  <div class="row well">
-                     <form action="/users/<%= user._id %>?tab=password&_method=PUT" method="POST">
-                        <div class="form-group">
-                           <label for="old">Old Password:</label>
-                           <input id="old" type="password" class="form-control" name="oldpass" placeholder="Old Password" required>
-                        </div>
-                        <div class="form-group">
-                           <label for="new">New Password:</label>
-                           <input id="new" type="password" class="form-control" name="newpass" placeholder="New Password" required>
-                        </div>
-                        <div class="form-group">
-                           <label for="confirm">Verify Password:</label>
-                           <input id="confirm" type="password" class="form-control" name="confirm" placeholder="Verify Password" required>
-                        </div>
-                        <div class="form-group">
-                           <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
-                           <button class="btn btn-sm btn-warning" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
-                        </div>
-                     </form>
-                  </div>
-               </div>
+  <div class="col-md-9 col-sm-6 col-xs-12">
+    <div class="row">
+      <div class="col-md-6">
+        <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" href="#info">Info</a></li>
+          <li><a data-toggle="tab" href="#pass">Password</a></li>
+        </ul>
+        <hr>
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="info">
+            <div class="row well">
+              <form id="formInfo" action="/users/<%= user._id %>?tab=info&_method=PUT" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                  <label for="emailUser">Email:</label>
+                  <input id="emailUser" type="email" class="form-control" name="email" placeholder="Email" value="<%= user.email %>" maxlength="30" autofocus required>
+                </div>
+                <div class="form-group">
+                  <label for="username">Username:</label>
+                  <input id="username" type="text" class="form-control" name="username" placeholder="Username" value="<%= user.username %>" maxlength="30" required>
+                </div>
+                <div class="form-group">
+                  <label for="fullname">Full Name:</label>
+                  <input id="fullname" type="text" class="form-control" name="fullname" placeholder="Full Name" value="<%= user.fullname %>" maxlength="50">
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
+                  <button class="btn btn-sm btn-warning" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+                </div>
+              </form>
             </div>
-         </div>
-         <div class="col-md-6">
-            <div class="panel panel-default">
-               <div class="panel-heading">
-                  <strong>User's Post</strong> 
-               </div>
-               <div class="panel-body">
-                  <% if(landscapes){ %>
-                     <% landscapes.forEach(landscape => { %>
-                        <div class="row" style="display: flex">
-                           <div class="col-md-4 text-center" style="box-sizing: unset;">
-                              <img class="img-responsive" src="<%= landscape.image %>" alt="preview" width="120" height="80">
-                           </div>
-                           <div class="col-md-6">
-                              <h4><strong><a href="/landscapes/<%= landscape._id %>"><%= landscape.name %></a></strong></h4>
-                              <h4>
-                                 <small><%= landscape.location %></small>
-                              </h4>
-                           </div>   
-                        </div>
-                        <hr>
-                     <% }); %>
-                  <% } %>
-               </div>
+          </div>
+          <div class="tab-pane fade" id="pass">
+            <div class="row well">
+              <form action="/users/<%= user._id %>?tab=password&_method=PUT" method="POST" autocomplete="off">
+                <div class="form-group">
+                  <label for="old">Old Password:</label>
+                  <input id="old" type="password" class="form-control" name="oldpass" placeholder="Old Password" required>
+                </div>
+                <div class="form-group">
+                  <label for="new">New Password:</label>
+                  <input id="new" type="password" class="form-control" name="newpass" placeholder="New Password" required>
+                </div>
+                <div class="form-group">
+                  <label for="confirm">Verify Password:</label>
+                  <input id="confirm" type="password" class="form-control" name="confirm" placeholder="Verify Password" required>
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-sm btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
+                  <button class="btn btn-sm btn-warning" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+                </div>
+              </form>
             </div>
-         </div>
+          </div>
+        </div>
       </div>
-   </div>
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <strong>User's Post</strong> 
+          </div>
+          <div class="panel-body">
+            <% if(landscapes){ %>
+              <% landscapes.forEach(landscape => { %>
+                <div class="row" style="display: flex">
+                  <div class="col-md-4 text-center" style="box-sizing: unset;">
+                    <img class="img-responsive" src="<%= landscape.image.content %>" alt="preview" width="120" height="80">
+                  </div>
+                  <div class="col-md-6">
+                    <h4><strong><a href="/landscapes/<%= landscape._id %>"><%= landscape.name %></a></strong></h4>
+                    <h4><small><%= landscape.location %></small></h4>
+                  </div>   
+                </div>
+                <hr>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+<script>
+  function readURL(input){
+    console.log("Trigger");
+    if(input.files && input.files[0]){
+      let reader = new FileReader();
+      reader.onload = function(e){
+        $('#avatar').attr('src', e.target.result);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
 <% include ../partials/footer %>

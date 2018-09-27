@@ -1,8 +1,9 @@
 const express             = require('express');
 const router              = express.Router();
 
-const middleware          = require('../middleware'); /** It's not necessary to write index */
+const middleware          = require('../middleware');
 const landscapeController = require('../controllers/landscapeController');
+const multer              = require('../config/multer');
 
 // INDEX ROUTE
 router.get('/', landscapeController.landscapeIndex);
@@ -11,7 +12,7 @@ router.get('/', landscapeController.landscapeIndex);
 router.get('/new', middleware.isLoggedIn, landscapeController.landscapeNew);
 
 // CREATE ROUTE
-router.post('/', middleware.isLoggedIn, landscapeController.upload.single('image'), landscapeController.landscapeCreate);
+router.post('/', middleware.isLoggedIn, multer.single('image'), landscapeController.landscapeCreate);
 
 // SHOW ROUTE
 router.get('/:id', landscapeController.landscapeShow);
@@ -20,7 +21,7 @@ router.get('/:id', landscapeController.landscapeShow);
 router.get('/:id/edit', middleware.checkLandscapeOwnership, landscapeController.landscapeEdit);
 
 // UPDATE ROUTE
-router.put('/:id', middleware.checkLandscapeOwnership, landscapeController.upload.single('image'), landscapeController.landscapeUpdate);
+router.put('/:id', middleware.checkLandscapeOwnership, multer.single('image'), landscapeController.landscapeUpdate);
 
 // DESTROY ROUTE  
 router.delete('/:id', middleware.checkLandscapeOwnership, landscapeController.landscapeDestroy);
