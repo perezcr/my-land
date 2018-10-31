@@ -1,32 +1,63 @@
 <% include ./partials/header.ejs %>
-<div class="row">
-  <h1 class="text-center">Login</h1>
-  <div class="div-center">
-    <div style="width:60%; margin: auto">
-      <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
-        <span class="fab fa-facebook"></span> Continue with Facebook
-      </a>
-      <a href="/auth/google" class="btn btn-block btn-social btn-google">
-        <span class="fab fa-google"></span> Continue with Google
-      </a>
-    </div>
-    <hr>
-    <form action="/login" method="POST" autocomplete="on">
+<div class="row mb-5">
+  <div class="col-md-12 text-center mb-3">
+    <h1>Sign In</h1>
+  </div>
+  <div class="m-auto">    
+    <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
+      <span class="fab fa-facebook"></span>Facebook
+    </a> 
+    <a href="/auth/google" class="btn btn-block btn-social btn-google">
+      <span class="fab fa-google"></span>Google
+    </a> 
+    <div class="row mt-2">
+      <div class="col"><hr></div>
+      <div class="col-auto"><p class="text-muted">OR</p></div>
+      <div class="col"><hr></div>
+    </div> 
+    <form action="/login" method="POST" autocomplete="off">
       <div class="form-group">
-        <label for="login-email">Email:</label>
-        <input id="login-email" class="form-control" type="email" name="email" placeholder="user@email.com" maxlength="30" required>
+        <label for="login-email" class="col-form-label"><strong>Email</strong></label>
+        <input id="login-email" class="form-control" type="email" name="email" placeholder="user@email.com" maxlength="80" required>
       </div>
       <div class="form-group">
-        <label for="login-password">Password:</label>
+        <label for="login-password" class="col-form-label"><strong>Password</strong></label>
         <input id="login-password" class="form-control" type="password" name="password" placeholder="password" required>
       </div>
-      <div class="form-group">
-        <input class="btn btn-lg btn-primary btn-block" type="submit" value="Login">
-      </div>   
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
     </form>
-    <div class="login-help">
-      <a href="/signup">Register</a> - <a href="/forgot">Forgot Password</a> - <a href="/landscapes">Go Back</a>
+    <hr>
+    <div class="login-help mt-2">
+      <a href="/signup">Register</a> | 
+      <button class="btn btn-link" data-toggle="modal" data-target="#forgotPassword">Forgot Password</button> | 
+      <a href="/landscapes">Go Back</a>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="forgotPassword" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="forgotPasswordLabel">Forgot Password</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="forgotForm" action="/forgot" method="POST">
+              <div class="form-group">
+                <label for="forgot-email" class="col-form-label"><strong>Email</strong></label>
+                <input id="forgot-email" class="form-control" type="text" name="email" placeholder="user@email.com" maxlength="80" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" form="forgotForm">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
+</div> 
 <% include ./partials/footer.ejs %>

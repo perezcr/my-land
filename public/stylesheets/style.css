@@ -1,36 +1,17 @@
-.thumbnail {
-   padding: 0;
+.border-left-success {
+  border-left: 4px solid #28a745;
 }
 
-.thumbnail img {
-   width: 100%;
+.border-left-warning {
+  border-left: 4px solid #ffc107;
 }
 
-.thumbnail .caption {
-   padding: 9px;
-}
-
-.delete-form {
-   display: inline;
-}
-
-.div-center {
-   width: 30%;
-   margin: 25px auto;
-}
-
-.avatar {
-  display: initial;
-  width: 200px;
-  height: 200px;
-}
-
-#landscape-index {
-   display: flex;
-   flex-wrap: wrap;
+.list-posts {
+  height: 600px; 
+  overflow-y: scroll;
 }
 
 #map {
-   height: 400px;
-   width: 100%;
+  height: 400px;
+  width: 100%;
 }

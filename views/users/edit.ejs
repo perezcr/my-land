@@ -1,0 +1,118 @@
+<% include ../partials/header %>
+<div class="row mb-5">
+  <div class="col-md-12 text-center mb-3">
+    <h1>Edit Profile</h1>
+  </div>
+
+  <div class="mx-auto col-md-5 col-sm-7 col-10">
+    <div class="card shadow-sm mb-3">
+      <img id="avatar" src="<%= user.avatar.content %>" class="card-img-top" alt="User Avatar">
+      <div class="card-body">
+        <form action="/users/<%= user._id %>/avatar?_method=PUT" method="POST" enctype="multipart/form-data">
+          <div class="input-group">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" name="avatar" id="inputGroupFile" aria-describedby="uploadFile"
+                accept="image/*">
+              <label class="custom-file-label" for="inputGroupFile">Choose Image</label>
+            </div>
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-outline-success" id="uploadFile" disabled>Upload</button>
+            </div>
+          </div>
+        </form>      
+      </div>
+    </div>
+  </div>
+
+  <div class="mx-auto col-md-5 col-sm-7 col-10">
+    <div class="accordion" id="accordionUser">
+      <div class="card shadow-sm">
+        <div class="card-header" id="headingOne">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="text-muted"><i class="fas fa-wrench"></i> General</h6>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#collapseOne"
+              aria-expanded="true" aria-controls="collapseOne">
+              Edit
+            </button>              
+          </div>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionUser">
+          <div class="card-body">
+            <form class="mt-3" action="/users/<%= user._id %>?_method=PUT" method="POST">
+              <div class="form-group">
+                <label for="user-edit-email" class="col-form-label"><strong>Email</strong></label>
+                <input id="user-edit-email" type="email" class="form-control" name="user[email]" placeholder="Email"
+                  value="<%= user.email %>" maxlength="80" autofocus>
+              </div>
+              <div class="form-group">
+                <label for="user-edit-username" class="col-form-label"><strong>Username</strong></label>
+                <input id="user-edit-username" type="text" class="form-control" name="user[username]" placeholder="Username"
+                  value="<%= user.username %>" maxlength="80">
+              </div>
+              <div class="form-group">
+                <label for="user-edit-fullname" class="col-form-label"><strong>Full Name</strong></label>
+                <input id="user-edit-fullname" type="text" class="form-control" name="user[fullname]" placeholder="Full name"
+                  value="<%= user.fullname %>" maxlength="80">
+              </div>
+              <div class="form-group">
+                <label for="user-edit-aboutme" class="col-form-label"><strong>About me</strong></label>
+                <textarea class="form-control" name="user[aboutme]" id="user-edit-aboutme" rows="5" maxlength="400"
+                  placeholder="About me..."><%= user.aboutme %></textarea>
+              </div>
+              <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-check"></i> Save</button>
+              <button class="btn btn-sm btn-warning" type="reset"><i class="fas fa-sync-alt"></i> Reset</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-header" id="headingTwo">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="text-muted"><i class="fas fa-key"></i> Change password</h6>
+            <button class="btn btn-sm btn-outline-secondary collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo"
+              aria-expanded="false" aria-controls="collapseTwo">
+              Edit
+            </button>           
+          </div>               
+        </div>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionUser">
+          <div class="card-body">
+            <form action="/users/<%= user._id %>/password?_method=PUT" method="POST">
+              <div class="form-group">
+                <label for="user-edit-current-password" class="col-form-label"><strong>Current</strong></label>
+                <input id="user-edit-current-password" type="password" class="form-control" name="current" placeholder="Current password" autofocus>
+              </div>
+              <div class="form-group">
+                <label for="user-edit-new-password" class="col-form-label"><strong>New</strong></label>
+                <input id="user-edit-new-password" type="password" class="form-control" name="new" placeholder="New password">
+              </div>
+              <div class="form-group">
+                <label for="user-edit-retype-password" class="col-form-label"><strong>Re-type new</strong></label>
+                <input id="user-edit-retype-password" type="password" class="form-control" name="retypeNew" placeholder="Re-type password">
+              </div>
+              <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-check"></i> Save</button>
+              <button class="btn btn-sm btn-warning" type="reset"><i class="fas fa-sync-alt"></i> Reset</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  $('#inputGroupFile').change(function (e) {
+    let fileName = e.target.files[0].name;
+    let reader = new FileReader();
+    if (fileName) {
+      $('.custom-file-label').html(fileName);
+      $('#uploadFile').prop('disabled', false);
+
+      reader.onload = function (e) {
+        $('#avatar').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
+</script>
+<% include ../partials/footer %>
