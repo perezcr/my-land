@@ -14,6 +14,7 @@ var userSchema = new mongoose.Schema({
   },
   password: String,
   fullname: String,
+  aboutme: String,
   provider: String,
   avatar: { 
     id: {
@@ -22,7 +23,7 @@ var userSchema = new mongoose.Schema({
     },
     content: {
       type: String,
-      default: 'https://res.cloudinary.com/cristian7x/image/upload/v1537990028/default-avatar.png'
+      default: 'https://res.cloudinary.com/cristian7x/image/upload/v1538108498/myland/avatar/default-avatar.png'
     }
   },
   socialId: String,
