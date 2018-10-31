@@ -68,11 +68,6 @@ exports.indexAuthCallbackGoogle = passport.authenticate('google', {
   failureRedirect : '/login'
 });
 
-// Display the forgot password form on GET
-exports.indexForgotGet = function(req, res){
-  res.render('forgot', { user: req.user });
-}
-
 // Handle forgot password on POST
 exports.indexForgotPost = function(req, res){
   async.waterfall([
@@ -86,7 +81,7 @@ exports.indexForgotPost = function(req, res){
       User.findOne({ email: req.body.email }, function(err, user) {
         if (!user) {
           req.flash('error', 'No account with that email address exists.');
-          return res.redirect('/forgot');
+          return res.redirect('/login');
         }
         user.resetPasswordToken = token;
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
@@ -122,7 +117,7 @@ exports.indexForgotPost = function(req, res){
   ],
   function(err) {
     if (err) return next(err);
-    res.redirect('/forgot');
+    res.redirect('/login');
   });
 };
 
@@ -130,7 +125,7 @@ exports.indexResetGet = function(req, res){
   User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) { //$gt -> greater
     if (!user) {
       req.flash('error', 'Password reset token is invalid or has expired.');
-      return res.redirect('/forgot');
+      return res.redirect('/login');
     }
     res.render('reset', { token: req.params.token });
   });

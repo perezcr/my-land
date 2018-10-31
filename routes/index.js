@@ -14,8 +14,6 @@ router.get('/login', indexController.indexLoginGet);
 
 router.post('/login', indexController.indexLoginPost);
 
-router.get('/forgot', indexController.indexForgotGet);
-
 router.post('/forgot', indexController.indexForgotPost);
 
 router.get('/reset/:token', indexController.indexResetGet);

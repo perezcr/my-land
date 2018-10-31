@@ -1,18 +1,6 @@
 const Comment   = require('../models/comment');
 const Landscape = require('../models/landscape');
 
-// Display comment new form on GET
-exports.commentNew = function(req, res){
-  Landscape.findById(req.params.id, (err, landscape) => {
-    if(err || !landscape){
-      req.flash('error', 'Landscape not found');
-      res.redirect("/landscapes/" + req.params.id);
-    } else{
-      res.render("comments/new", { landscape: landscape });
-    }
-  });
-};
-
 // Handle comment create on POST
 exports.commentCreate = function(req, res){
   Landscape.findById(req.params.id, (err, landscape) => {
@@ -35,25 +23,6 @@ exports.commentCreate = function(req, res){
           landscape.save();
           req.flash('success', 'The comment was created');
           res.redirect("/landscapes/" + landscape._id);
-        }
-      });
-    }
-  });
-};
-
-// Display comment update form on GET
-exports.commentEdit = function(req, res){
-  Landscape.findById(req.params.id, (err, landscape) => {
-    if(err || !landscape){
-      req.flash('error', 'Landscape not found');
-      res.redirect('/landscapes');
-    } else{
-      Comment.findById(req.params.comment_id, (err, comment) => {
-        if(err){
-          req.flash('error', err);
-          res.redirect('back');
-        } else{
-          res.render('comments/edit', {landscape_id: req.params.id, comment: comment});
         }
       });
     }
