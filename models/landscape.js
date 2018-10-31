@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Comment = require('./comment');
 
 // SCHEMA SET UP
 const landscapeSchema = new mongoose.Schema({
@@ -39,6 +40,18 @@ const landscapeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }]
+});
+
+landscapeSchema.pre('remove', async function(){
+  try {
+    await Comment.remove({
+      '_id': {
+        $in: this.comments
+      }
+    });
+  } catch (err) {
+    console.log("Error in Landscape Schema!");
+  }
 });
 
 module.exports = mongoose.model('Landscape', landscapeSchema);
