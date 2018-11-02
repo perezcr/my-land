@@ -1,5 +1,5 @@
 <% include ../partials/header %>
-<div class="row mb-5">
+<div class="row my-6">
   <div class="col-md-12 text-center mb-3">
     <h1>Edit: <%=landscape.name%></h1>    
   </div>
@@ -19,7 +19,7 @@
       </div>
       <div class="form-group">
         <label for="landscape-edit-description" class="col-form-label"><strong>Description</strong></label>
-        <textarea class="form-control" name="description" id="landscape-edit-description" rows="5" maxlength="400"><%= landscape.description %></textarea>
+        <textarea class="form-control" name="description" id="landscape-edit-description" rows="5" maxlength="600"><%= landscape.description %></textarea>
       </div>
       <div class="form-group">      
         <div class="custom-file">

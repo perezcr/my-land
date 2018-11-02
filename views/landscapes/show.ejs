@@ -1,19 +1,20 @@
 <% include ../partials/header %>
-<div class="container">
+<div class="container my-6">
   <div class="row">
     <div class="col-md-3">
-      <h4 class="mb-4 text-secondary">MyLand</h4>
       <div class="list-group mb-4">
+        <% if(landscape.entranceFee) { %>
+          <li class="list-group-item list-group-item-light">
+            <h6>Entrance Fee</h6>
+            <p><i class="fas fa-dollar-sign"></i> <%= landscape.entranceFee %></p>
+          </li>
+        <% } %>
         <li class="list-group-item list-group-item-light">
-          <h6>Entrance Fee:</h6>
-          <p>$<%= landscape.entranceFee %></p>
-        </li>
-        <li class="list-group-item list-group-item-light">
-          <h6>Published:</h6>
+          <h6><i class="fas fa-calendar-alt"></i> Published</h6>
           <small><%= moment(landscape.createdAt).format('MMMM Do YYYY, h:mm a') %></small>
         </li>
       </div>
-      <div class="mb-4 shadow-sm" id="map" style="border: 2px solid black;"></div>
+      <div class="mb-4 shadow-sm" id="map"></div>
     </div>
     <div class="col-md-9">
       <div class="card mb-4 shadow-sm">
@@ -98,7 +99,8 @@
             
           <div class="row">
             <!--Display comments by looping through them-->
-            <% landscape.comments.forEach((comment) => { %>       
+            <% landscape.comments.forEach(function(comment){ %>
+                   
               <div class="col-md-12 mb-1">
                 <div class="card bg-light shadow-sm">
                   <div class="card-body">
@@ -126,16 +128,15 @@
                         <!--Edit button used for collapsing the edit comment form-->
                         <a class="btn btn-sm btn-outline-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= comment._id %>" aria-expanded="false" aria-controls="collapse<%= comment._id %>">Edit</a>
                         <!--Delete comment button-->
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#deleteComment">Delete</button>         
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#modalDelete<%= comment._id %>">Delete</button>
                       </div>
-                      <form id="deleteCommentForm" action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST"></form>
-
+                      
                       <!-- Modal -->
-                      <div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel" aria-hidden="true">
+                      <div class="modal fade" id="modalDelete<%= comment._id %>" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel<%= comment._id %>" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                           <div class="modal-content">
                             <div class="modal-header">
-                              <h5 class="modal-title" id="deleteCommentLabel">Delete Comment</h5>
+                              <h5 class="modal-title" id="modalDeleteLabel<%= comment._id %>">Delete Comment</h5>
                               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                               </button>
@@ -145,7 +146,9 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                              <button type="submit" class="btn btn-danger" form="deleteCommentForm">Delete</button>
+                              <form action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                              </form>  
                             </div>
                           </div>
                         </div>
@@ -168,6 +171,7 @@
                           </form>
                         </div>
                       </div>
+                      
                     <% } %>
                   </div>
                 </div>
@@ -180,27 +184,27 @@
   </div>
 </div>
 
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
-<link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css">
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css' rel='stylesheet' />
 <script async defer>
-  //mapboxgl.accessToken = '<%= key %>';
+  mapboxgl.accessToken = '<%= key %>';
   
-  var map = new mapboxgl.Map({
+  let map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
     center: ['<%= landscape.lng %>', '<%= landscape.lat %>'], // starting position [lng, lat]
     zoom: 8 // starting zoom
   });
   
-  var marker = new mapboxgl.Marker({
-    color: '#7C0A02'
+  let marker = new mapboxgl.Marker({
+    color: '#3bb2d0',
   });
   
-  var popUp = new mapboxgl.Popup({
+  let popUp = new mapboxgl.Popup({
     offset: 25
   });
   
-  popUp.setHTML('<h4><%= landscape.name %></h4>'+'<p><%= landscape.location %></p>');
+  popUp.setHTML('<h5><%= landscape.name %></h5>'+'<p class="text-muted"><%= landscape.location %></p>');
   marker.setLngLat(map.getCenter());
   marker.setPopup(popUp);
   marker.addTo(map);
