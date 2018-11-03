@@ -44,13 +44,9 @@ const landscapeSchema = new mongoose.Schema({
 
 landscapeSchema.pre('remove', async function(){
   try {
-    await Comment.remove({
-      '_id': {
-        $in: this.comments
-      }
-    });
+    await Comment.deleteMany({ '_id': { $in: this.comments } });
   } catch (err) {
-    console.log("Error in Landscape Schema!");
+    console.log("Error deleteting comments!");
   }
 });
 

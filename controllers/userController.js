@@ -39,10 +39,11 @@ exports.userEdit = function(req, res){
 
 // Handle user update on PUT.
 exports.userUpdate = function(req, res){
-  User.findByIdAndUpdate(req.params.id, req.body.user, (err, user) => {
+  console.log('***************+');
+  User.findOneAndUpdate({ _id: req.params.id }, req.body.user, (err, user) => {
     if(err){
       req.flash('error', err.message);
-      return res.redirect(`/users/${user._id}`);
+      return res.redirect('back');
     }
     req.flash('success', 'The user was updated');
     res.redirect('back');

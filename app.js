@@ -19,7 +19,6 @@ const landscapesRoutes  = require('./routes/landscapes');
 const commentRoutes     = require('./routes/comments');
 const userRoutes        = require('./routes/users');
 
-
 // Create the Express application object
 const app = express();
 
@@ -28,7 +27,8 @@ app.use(helmet());
 // Set up mongoose connection
 const devDbUrl = 'mongodb://localhost:27017/my_land';
 const mongoDB = process.env.MONGODB_URLI || devDbUrl;
-mongoose.connect(mongoDB, { useNewUrlParser: true });
+mongoose.connect(mongoDB, { useCreateIndex: true, useNewUrlParser: true });
+mongoose.set('useFindAndModify', false);
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -37,7 +37,8 @@ app.use(logger('dev'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
-app.use(flash()); // The message don't persist on every single request, it's only one time, for this reason is called flash
+app.use(flash()); 
+// The message don't persist on every single request, it's only one time, for this reason is called flash
 // Note about flash
 // Work before res.redirect()
 //    req.flash('info', 'Flash is back!')
@@ -45,7 +46,7 @@ app.use(flash()); // The message don't persist on every single request, it's onl
 // And res.render()
 //    res.render('index', { messages: req.flash('info') });
 //
-//seedDB();
+seedDB();
 
 // Moment JS for Date
 app.locals.moment = require('moment');

@@ -77,15 +77,15 @@
             <form action="/users/<%= user._id %>/password?_method=PUT" method="POST">
               <div class="form-group">
                 <label for="user-edit-current-password" class="col-form-label"><strong>Current</strong></label>
-                <input id="user-edit-current-password" type="password" class="form-control" name="current" placeholder="Current password" autofocus>
+                <input id="user-edit-current-password" type="password" class="form-control" name="current" placeholder="Current password" required autofocus>
               </div>
               <div class="form-group">
                 <label for="user-edit-new-password" class="col-form-label"><strong>New</strong></label>
-                <input id="user-edit-new-password" type="password" class="form-control" name="new" placeholder="New password">
+                <input id="user-edit-new-password" type="password" class="form-control" name="new" placeholder="New password" required>
               </div>
               <div class="form-group">
                 <label for="user-edit-retype-password" class="col-form-label"><strong>Re-type new</strong></label>
-                <input id="user-edit-retype-password" type="password" class="form-control" name="retypeNew" placeholder="Re-type password">
+                <input id="user-edit-retype-password" type="password" class="form-control" name="retypeNew" placeholder="Re-type password" required>
               </div>
               <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-check"></i> Save</button>
               <button class="btn btn-sm btn-warning" type="reset"><i class="fas fa-sync-alt"></i> Reset</button>

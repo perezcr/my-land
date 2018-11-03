@@ -31,7 +31,7 @@ exports.commentCreate = function(req, res){
 
 // Handle comment update on PUT.
 exports.commentUpdate = function(req, res){
-  Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, (err, comment) => {
+  Comment.findOneAndUpdate({ _id: req.params.comment_id }, req.body.comment, (err, comment) => {
     if(err){
       req.flash('error', err);
       res.redirect('back');
@@ -44,11 +44,11 @@ exports.commentUpdate = function(req, res){
 
 // Handle comment delete on DELETE.
 exports.commentDestroy = function(req, res){
-  Comment.findByIdAndRemove(req.params.comment_id, (err) => {
-    if(err){
+  Comment.findOneAndDelete({ _id: req.params.comment_id }, (err) => {
+    if(err) {
       req.flash('error', err);
       res.redirect('back');
-    } else{
+    } else {
       req.flash('success', 'The comment was deleted');
       res.redirect('back');
     }
