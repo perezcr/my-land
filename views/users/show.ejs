@@ -4,7 +4,7 @@
 
     <div class="col-lg-4 col-md-6 col-sm-8 col-12">
       <div class="card shadow-sm mb-3">
-        <img class="card-img-top" src="<%= user.avatar.content %>" height="250px" alt="Card image cap">
+        <img class="card-img-top user-avatar" src="<%= user.avatar.content %>" alt="<%= user.avatar.id %>">
         <% if(currentUser && user._id.equals(currentUser._id)){ %>
           <div class="position-absolute w-100">
             <div class="float-right m-3">
@@ -15,12 +15,23 @@
         <div class="card-body">
           <div class="text-center">
             <h2 class="font-weight-light d-inline mr-3"><%= user.username %></h2>
-            <button class="btn btn-sm btn-outline-primary mb-3" type="button">Follow</button>
+            <% if(!user._id.equals(currentUser._id)) { %>
+              <% let isFollowing = currentUser.following.some(follower => follower.equals(user._id)); %>
+              <% if(isFollowing) { %>
+                <form class="d-inline" action="/users/<%= user._id %>/unfollow?_method=PUT" method="POST">
+                  <button class="btn btn-sm btn-outline-danger mb-3" type="submit">Unfollow</button>
+                </form>
+              <% } else { %>
+                <form class="d-inline" action="/users/<%= user._id %>/follow?_method=PUT" method="POST">
+                  <button class="btn btn-sm btn-outline-primary mb-3" type="submit">Follow</button>
+                </form>
+              <% } %>       
+            <% } %>
           </div>
           <div class="d-flex justify-content-between align-items-center text-muted">
             <p><%= landscapes.length %> posts</p>
-            <p>0 followers</p>
-            <p>0 following</p>
+            <p><%= user.followers.length %> followers</p>
+            <p><%= user.following.length %> following</p>
           </div>
           <hr>
           <div class="card shadow-sm">

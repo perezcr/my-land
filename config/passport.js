@@ -34,41 +34,29 @@ module.exports = function (passport) {
     passwordField: 'password',
     passReqToCallback: true // allows us to pass back the entire request to the callback
   },
-    function (req, email, password, done) {
-      // asynchronous
-      // User.findOne wont fire unless data is sent back
-      process.nextTick(() => {
-        // find a user whose email is the same as the forms email
-        // we are checking to see if the user trying to login already exists
-        User.findOne({ 'email': email, 'provider': 'local' }, function (err, user) {
-          // if there are any errors, return the error
-          if (err) return done(err);
-          // check to see if theres already a user with that email
-          if (user) return done(null, false, req.flash('error', 'That email is already taken.'));
-          else {
-            // if there is no user with that email
-            // create the user
-            let newUser = new User();
-            newUser.email = email;
-            newUser.username = req.body.username;
-            newUser.fullname = req.body.fullname;
-            newUser.provider = 'local';
-            newUser.password = password;
-            if (req.body.isAdmin === process.env.ADMIN_CODE) newUser.isAdmin = true;     
-            // Save the user
-            newUser.save(function (err) {
-              if (err) {
-                if (err.name === 'MongoError')
-                  return done(null, false, req.flash('error', 'That username is already taken.'));
-                else
-                  return done(null, false, req.flash('error', 'The username is required.'));
-              }
-              req.flash('success', 'Successfully Signed Up!');
-              return done(null, newUser);
-            });
-          }
+    async function (req, email, password, done) {
+      try {
+        // Check to see if theres already a user with that email
+        let user = await User.findOne({ 'email': email, 'provider': 'local' });
+        if(user) {
+          return done(null, false, req.flash('error', 'That email is already taken.'));
+        }
+        let newUser = await User.create({
+          email: email,
+          username: req.body.username,
+          fullname: req.body.fullname,
+          provider: 'local',
+          password: password,
+          isAdmin: req.body.isAdmin === process.env.ADMIN_CODE ? true : false
         });
-      });
+        req.flash('success', 'Successfully Signed Up!');
+        return done(null, newUser);
+      } catch (err) {
+        if(err.name === 'MongoError') {
+          return done(null, false, req.flash('error', 'That username is already taken.'));
+        }
+        done(null, false, req.flash('error', err.message));   
+      }
     }
   ));
 
@@ -82,24 +70,22 @@ module.exports = function (passport) {
     passwordField: 'password',
     passReqToCallback: true // allows us to pass back the entire request to the callback
   },
-    function (req, email, password, done) { // callback with email and password from our form
-      // find a user whose email is the same as the forms email
-      // we are checking to see if the user trying to login already exists
-      User.findOne({ 'email': email, 'provider': 'local' }, function (err, user) {
-        // if there are any errors, return the error before anything else
-        if (err) return done(err);
-        // if no user is found, return the message
-        if (!user)
-          return done(null, false, req.flash('error', 'Incorrect username.')); // req.flash is the way to set flashdata using connect-flash
+    async function (req, email, password, done) { // callback with email and password from our form
+      try {
+        let user = await User.findOne({ 'email': email, 'provider': 'local' });
+        // if no user is found
+        if(!user) {
+          return done(null, false, req.flash('error', 'Incorrect username.'));
+        }
+        const isMatch = await user.validPassword(password);
         // if the user is found but the password is wrong
-        user.validPassword(password, function (err, isMatch) {
-          if (isMatch) return done(null, user, req.flash('success', 'Welcome!'));
-          else {
-            // create the loginMessage and save it to session as flashdata
-            return done(null, false, req.flash('error', 'Incorrect password.'));
-          }
-        });
-      });
+        if(!isMatch) {
+          return done(null, false, req.flash('error', 'Incorrect password.'));
+        }
+        done(null, user, req.flash('success', 'Welcome!'));       
+      } catch (err) {
+        done(null, false, req.flash('error', err.message));  
+      }
     }
   ));
 
@@ -113,36 +99,30 @@ module.exports = function (passport) {
     profileFields: configAuth.facebookAuth.profileFields
   },
     // facebook will send back the token and profile
-    function (accessToken, refreshToken, profile, done) {
-      process.nextTick(function () {
+    async function (accessToken, refreshToken, profile, done) {
+      try {
         // find the user in the database based on their facebook id
-        User.findOne({ 'socialId': profile.id }, function (err, user) {
-          // if there is an error, stop everything and return that
-          // ie an error connecting to the database
-          if (err) return done(err);
-          // if the user is found, then log them in
-          if (user) return done(null, user);
-          else {
-            // if there is no user found with that facebook id, create them
-            let newUser = new User();
-            // set all of the facebook information in our user model
-
-            newUser.socialId = profile.id; // set the users facebook id                   
-            newUser.socialToken = accessToken; // we will save the token that facebook provides to the user
-            newUser.provider = profile.provider;
-            newUser.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first                   
-            newUser.fullname = profile.name.givenName + " " + profile.name.familyName;
-            newUser.username = newUser.fullname.split(" ")[0] + profile.id.substr(0, 6);
-            newUser.avatar = profile.photos[0].value;
-            // save our user to the database
-            newUser.save(function (err) {
-              if (err) { throw err; }
-              // if successful, return the new user
-              return done(null, newUser);
-            });
-          }
+        let user = await User.findOne({ 'socialId': profile.id });
+        // if the user is found, then log them in
+        if(user) {
+          return done(null, user);
+        }
+        // if there is no user found with that facebook id, create them
+        let newUser = await User.create({
+          socialId: profile.id, // set the users facebook id 
+          socialToken: accessToken, // save the token that facebook provides to the user
+          provider: profile.provider,
+          email: profile.emails[0].value, // facebook can return multiple emails so we'll take the first
+          fullname: profile.name.givenName + " " + profile.name.familyName,
+          username: profile.name.givenName + profile.id.substr(0, 6),
+          avatar: profile.photos[0].value
         });
-      });
+        // if successful, return the new user
+        done(null, newUser);
+      } catch (err) {
+        console.log(err);
+        done(err);
+      }  
     }
   ));
 
@@ -153,38 +133,30 @@ module.exports = function (passport) {
     clientSecret: configAuth.googleAuth.clientSecret,
     callbackURL: configAuth.googleAuth.callbackURL
   },
-    function (accessToken, refreshToken, profile, done) {
-      // make the code asynchronous
-      // User.findOne won't fire until we have all our data back from Google
-      process.nextTick(function () {
-        // find the user in the database based on their facebook id
-        User.findOne({ 'socialId': profile.id }, function (err, user) {
-          // if there is an error, stop everything and return that
-          // ie an error connecting to the database
-          if (err) return done(err);
-
-          // if the user is found, then log them in
-          if (user) return done(null, user);
-          else {
-            // if there is no user found with that facebook id, create them
-            let newUser = new User();
-            // set all of the facebook information in our user model
-            newUser.socialId = profile.id;            
-            newUser.socialToken = accessToken;
-            newUser.provider = profile.provider;
-            newUser.email = profile.emails[0].value;     
-            newUser.fullname = profile.displayName;
-            newUser.username = newUser.fullname.split(" ")[0] + profile.id.substr(0, 6);   
-            newUser.avatar = profile.photos[0].value;
-            // save our user to the database
-            newUser.save(function (err) {
-              if (err){ throw err; }
-              // if successful, return the new user
-              return done(null, newUser);
-            });
-          }
+    async function (accessToken, refreshToken, profile, done) {
+      try {
+        // find the user in the database based on their google id
+        let user = await User.findOne({ 'socialId': profile.id });
+        // if the user is found, then log them in
+        if(user) {
+          return done(null, user);
+        }
+        // if there is no user found with that google id, create them
+        let newUser = await User.create({
+          socialId: profile.id, // set the users google id 
+          socialToken: accessToken, // save the token that google provides to the user
+          provider: profile.provider,
+          email: profile.emails[0].value,
+          fullname: profile.displayName,
+          username: profile.displayName.split(' ')[0] + profile.id.substr(0, 6),
+          avatar: profile.photos[0].value
         });
-      });
+        // if successful, return the new user
+        done(null, newUser);
+      } catch (err) {
+        console.log(err);
+        done(err);
+      }     
     }
   ));
 }

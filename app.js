@@ -14,10 +14,11 @@ const helmet          = require('helmet');
 const seedDB          = require('./config/seed');
 
 // Routes
-const indexRoutes       = require('./routes/index');
-const landscapesRoutes  = require('./routes/landscapes');
-const commentRoutes     = require('./routes/comments');
-const userRoutes        = require('./routes/users');
+const indexRoutes         = require('./routes/index');
+const landscapesRoutes    = require('./routes/landscapes');
+const commentRoutes       = require('./routes/comments');
+const userRoutes          = require('./routes/users');
+const notificationRoutes  = require('./routes/notifications');
 
 // Create the Express application object
 const app = express();
@@ -46,7 +47,7 @@ app.use(flash());
 // And res.render()
 //    res.render('index', { messages: req.flash('info') });
 //
-seedDB();
+//seedDB();
 
 // Moment JS for Date
 app.locals.moment = require('moment');
@@ -65,9 +66,18 @@ app.use(passport.session());
 /** app.use: whatever function we provide to it will be called on every route 
  *  we want to do is pass that request at user to every single template
 */
-app.use((req, res, next) => {
+const User = require('./models/user');
+app.use(async function(req, res, next){
    // currentUser is acessible in each template
    res.locals.currentUser = req.user;
+   if(req.user) {
+    try {
+      let user = await User.findById(req.user._id).populate({ path: 'notifications', match: { isRead: false } }).exec();
+      res.locals.notifications = user.notifications.reverse();
+    } catch(err) {
+      console.log(err.message);
+    }
+   }
    res.locals.success = req.flash('success');
    res.locals.error = req.flash('error');
    next();
@@ -79,6 +89,7 @@ app.use('/', indexRoutes);
 app.use('/landscapes', landscapesRoutes);
 app.use('/landscapes/:id/comments', commentRoutes);
 app.use('/users', userRoutes);
+app.use('/users/:id/notifications', notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => { console.log(`Listening on ${PORT}`); });

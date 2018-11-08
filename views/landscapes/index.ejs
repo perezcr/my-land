@@ -7,7 +7,7 @@
     <h1 class="display-4"><i class="fas fa-globe-americas" aria-hidden="true"></i> Welcome To MyLand!</h1>
     <p class="lead">View our hand-picked landscapes from all over the world</p>
     <hr class="my-4">
-    <a class="btn btn-outline-primary btn-lg" href="/landscapes/new"><i class="fas fa-plus" aria-hidden="true"></i> Add New Landscape</a>
+    <a class="btn btn-outline-primary btn-lg" id="new-landscape" href="/landscapes/new"><i class="fas fa-plus" aria-hidden="true"></i> Add New Landscape</a>
   </div> 
 </div>
 
@@ -22,7 +22,7 @@
               <h5 class="card-title"><%= landscape.name %></h5>
               <div class="d-flex justify-content-between align-items-center">
                 <a href="/landscapes/<%= landscape._id %>" class="btn btn-sm btn-outline-info"><i class="fas fa-info-circle"></i> More Info</a>
-                <small class="text-muted"><%= moment(landscape.createdAt).startOf('hour').fromNow() %></small>
+                <small class="text-muted"><%= moment(landscape.createdAt).fromNow() %></small>
               </div>
             </div>
           </div>

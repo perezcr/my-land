@@ -3,24 +3,14 @@ const bcrypt   = require('bcrypt');
 
 // SCHEMA SET UP
 var userSchema = new mongoose.Schema({
-  email: { 
-    type: String, 
-    required: true 
-  },
-  username: { 
-    type: String, 
-    unique: true, 
-    required: true 
-  },
+  email: { type: String, required: true },
+  username: { type: String, unique: true, required: true },
   password: String,
   fullname: String,
   aboutme: String,
   provider: String,
   avatar: { 
-    id: {
-      type: String,
-      default: 'default-avatar'
-    },
+    id: { type: String, default: 'default-avatar' },
     content: {
       type: String,
       default: 'https://res.cloudinary.com/cristian7x/image/upload/v1538108498/myland/avatar/default-avatar.png'
@@ -30,10 +20,10 @@ var userSchema = new mongoose.Schema({
   socialToken : String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,
-  isAdmin: { 
-    type: Boolean, 
-    default: false 
-  }
+  isAdmin: { type: Boolean, default: false },
+  notifications: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Notification' } ],
+  followers: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User'} ],
+  following: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User'} ]
 });
 
 // Generating a hash
@@ -52,11 +42,8 @@ userSchema.pre('save', function(next){
 });
 
 // Checking if password is valid
-userSchema.methods.validPassword = function(candidatePassword, cb){
-  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-    if (err) return cb(err);
-    cb(null, isMatch);
-  });
+userSchema.methods.validPassword = function(candidatePassword){
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

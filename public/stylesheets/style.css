@@ -20,3 +20,26 @@
   margin-top: 4rem !important;
   margin-bottom: 4rem !important;
 }
+
+.user-avatar {
+  max-height: 250px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 600px) {
+  .media-body h6 {
+    font-size: 0.8rem;
+  }
+
+  #comment-header {
+    font-size: 1.2rem;
+  }
+
+  #new-landscape {
+    font-size: 1.0rem;
+  }
+
+  #new-comment {
+    font-size: 0.8rem;
+  }
+}

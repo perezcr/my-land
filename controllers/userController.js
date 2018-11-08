@@ -1,6 +1,7 @@
-const User        = require('../models/user');
-const Landscape   = require('../models/landscape');
-const cloudinary  = require('../config/cloudinary');
+const User          = require('../models/user');
+const Notification  = require('../models/notification');
+const Landscape     = require('../models/landscape');
+const cloudinary    = require('../config/cloudinary');
 
 // Display detail page for a specific user on GET
 exports.userShow = function(req, res){
@@ -39,7 +40,6 @@ exports.userEdit = function(req, res){
 
 // Handle user update on PUT.
 exports.userUpdate = function(req, res){
-  console.log('***************+');
   User.findOneAndUpdate({ _id: req.params.id }, req.body.user, (err, user) => {
     if(err){
       req.flash('error', err.message);
@@ -100,4 +100,36 @@ exports.userUpdatePassword = function(req, res){
     req.flash('error', 'New password don\'t match');
     return res.redirect('back');
   } 
+};
+
+exports.userUpdateFollow = async function(req, res){
+  try {
+    // The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.
+    let userFollower = await User.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { followers: req.user._id } });
+    let userFollowing = await User.findOneAndUpdate({ _id: req.user._id }, { $addToSet: { following: req.params.id } });
+    let notification = await Notification.create({
+      username: userFollowing.username,
+      avatar: userFollowing.avatar.content,
+      type: 'Follow',
+      userId: userFollowing._id
+    });
+    userFollower.notifications.push(notification);
+    await userFollower.save();
+    res.redirect('back');
+  } catch (err) {
+    req.flash('error', err.message);
+    res.redirect('back');
+  }
+};
+
+exports.userUpdateUnfollow = async function(req, res){
+  try {
+    // The $pull operator removes from an existing array all instances of a value or values that match a specified condition.
+    await User.findOneAndUpdate({ _id: req.params.id }, { $pull: { followers: req.user._id } });
+    await User.findOneAndUpdate({ _id: req.user._id }, { $pull: { following: req.params.id } });
+    res.redirect('back');
+  } catch (err) {
+    req.flash('error', err.message);
+    res.redirect('back');
+  }
 };

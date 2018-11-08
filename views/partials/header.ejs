@@ -38,6 +38,40 @@
             <li class="nav-item">
               <a class="nav-link" href="/users/<%= currentUser._id %>">Hi, <strong><%= currentUser.username %></strong></a>
             </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell"></i> Notifications
+                <% if(notifications.length) { %>
+                  <span class="badge badge-danger"><%= notifications.length %></span>
+                <% } %>     
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <% if(notifications.length) { %>
+                  <% notifications.forEach((notification) => { %>
+                    <a class="dropdown-item d-flex" href="/users/<%= currentUser._id %>/notifications/<%= notification._id %>">
+                      <img class="align-self-start mr-3" src="<%= notification.avatar %>" alt="<%= notification.username %>" width="50px" height="50px">
+                      <div class="media-body">
+                        <% const message = {
+                          'Landscape' : 'created a new landscape.',
+                          'Comment' : 'commented your landscape.',
+                          'Follow' : 'started following you.'
+                        }; %>
+                        <p class="text-dark m-0"><strong><%= notification.username %></strong> <%= message[notification.type] %></p>
+                        <p class="text-muted m-0"><small><i><%= moment(notification.createdAt).fromNow() %></i></small></p>
+                      </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                  <% }); %>
+                <% } else { %>
+                  <a class="dropdown-item text-center" href="#">
+                    <p class="text-muted font-italic">No notifications yet</p> 
+                  </a>
+                <% } %>            
+                <a class="dropdown-item text-center" href="/users/<%= currentUser._id %>/notifications">
+                  <p class="text-primary m-0">View all notifications</p> 
+                </a>
+              </div>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="/users/<%= currentUser._id %>"><i class="fas fa-user"></i> Profile</a>
             </li>

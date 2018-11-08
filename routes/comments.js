@@ -4,7 +4,7 @@ const router      = express.Router({mergeParams: true});
 const middleware        = require('../middleware');
 const commentController = require('../controllers/commentController');
 
-// CREATE ROUTE - comments
+// CREATE ROUTE
 router.post('/', middleware.isLoggedIn, commentController.commentCreate);
 
 // UPDATE ROUTE

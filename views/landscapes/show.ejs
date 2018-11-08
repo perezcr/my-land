@@ -59,11 +59,11 @@
       <div class="card mb-4 shadow-sm">
         <div class="card-body">
           <div class="float-right">
-            <a class="btn btn-outline-success" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment">
+            <a class="btn btn-outline-success" id="new-comment" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment">
               <i class="fas fa-plus" aria-hidden="true"></i> Add New Comment</a>
           </div>
           <!--Comment section title-->
-          <h4 class="text-muted clearfix">Comments <i class="fas fa-comments" aria-hidden="true"></i></h4>
+          <h4 id="comment-header" class="text-muted clearfix">Comments <i class="fas fa-comments" aria-hidden="true"></i></h4>
     
           <!--Collapse Add a comment form START-->
           <div class="collapse" id="collapseComment">
@@ -115,7 +115,8 @@
                             <i class="fas fa-user" aria-hidden="true"></i>
                           <% } %>
                           <!--Print out the author username-->
-                          <%= comment.author.username %>
+                          
+                          <a href="/users/<%= comment.author.id %>"><%= comment.author.username %></a>
                         </h6>
                         <p class="text-muted"><%= moment(comment.createdAt).fromNow() %></p>
                     </div>

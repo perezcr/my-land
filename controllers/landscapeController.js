@@ -1,6 +1,8 @@
-const Landscape   = require('../models/landscape');
-const geocoder    = require('mapbox-geocoding');
-const cloudinary  = require('../config/cloudinary');
+const Landscape     = require('../models/landscape');
+const User          = require('../models/user');
+const Notification  = require('../models/notification');
+const geocoder      = require('mapbox-geocoding');
+const cloudinary    = require('../config/cloudinary');
 
 // Geocoder Configuration
 geocoder.setAccessToken(process.env.GEOCODER_TOKEN);
@@ -21,39 +23,53 @@ exports.landscapeNew = (req, res) => res.render("landscapes/new");
 
 // Handle landscape create on POST
 exports.landscapeCreate = function(req, res){
-  cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'}, function(err, result){   
-    if(err){
-      req.flash('error', err.message);
-      return res.redirect('back');
-    }
-    // add cloudinary url for the image to the landscape object under image property
-    req.body.landscape.image = {
-      id: result.public_id,
-      content: result.secure_url
-    };
-    // add author to campground
-    req.body.landscape.author = {
-      id: req.user._id,
-      username: req.user.username
-    };
-    // ****** GEOCODER ******
-    // Get data from form and add to landscapes array
-    geocoder.geocode('mapbox.places', req.body.landscape.location, (err, geoData) => {
-      if (err || !geoData.features.length) {
+  // ****** GEOCODER ******
+  // Get data from form and add to landscapes array
+  geocoder.geocode('mapbox.places', req.body.landscape.location, async function(err, geoData){
+    try {
+      if(err){
+        req.flash('error', err.message);
+        res.redirect('back');
+      }
+      if (!geoData.features.length) {
         req.flash('error', 'Location not valid');
         return res.redirect('back');
       }
       [req.body.landscape.lng, req.body.landscape.lat] = geoData.features[0].center;
-      Landscape.create(req.body.landscape, (err, landscape) => {
-        if(err){
-          req.flash('error', 'Missing name, image or location');
-          return res.redirect("/landscapes/new");
-        }
-        // redirect back to landscapes page
-        req.flash('success', 'Landscape was created');
-        res.redirect(`/landscapes/${landscape.id}`);  
-      });
-    });
+
+      let result = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'});
+      // add cloudinary url for the image to the landscape object under image property
+      req.body.landscape.image = {
+        id: result.public_id,
+        content: result.secure_url
+      };
+      // add author to campground
+      req.body.landscape.author = {
+        id: req.user._id,
+        username: req.user.username
+      };
+
+      const landscapePromise = Landscape.create(req.body.landscape);
+      const userPromise = User.findById(req.user._id).populate('followers').exec();
+
+      const [landscape, user] = await Promise.all([landscapePromise, userPromise]);
+      for(const follower of user.followers) {
+        let notification = await Notification.create({
+          username: user.username,
+          avatar: user.avatar.content,
+          type: 'Landscape',
+          landscapeId: landscape._id
+        });
+        follower.notifications.push(notification);
+        follower.save();
+      }
+      // redirect back to landscapes page
+      req.flash('success', 'Landscape was created');
+      res.redirect(`/landscapes/${landscape.id}`);       
+    } catch (err) {
+      req.flash('error', err.message);
+      res.redirect('back');  
+    }
   });
 };
 

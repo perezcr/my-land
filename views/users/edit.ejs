@@ -3,7 +3,7 @@
 
   <div class="mx-auto col-md-5 col-sm-7 col-10">
     <div class="card shadow-sm mb-3">
-      <img id="avatar" src="<%= user.avatar.content %>" class="card-img-top" alt="User Avatar">
+      <img id="avatar" src="<%= user.avatar.content %>" class="card-img-top user-avatar" alt="User Avatar">
       <div class="card-body">
         <form action="/users/<%= user._id %>/avatar?_method=PUT" method="POST" enctype="multipart/form-data">
           <div class="input-group">
