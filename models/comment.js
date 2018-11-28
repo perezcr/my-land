@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
 
-// SCHEMA SET UP
 const commentSchema = new mongoose.Schema({
-  text : String,
-  createdAt: { type: Date, default: Date.now },
-  author : {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    username: String
+  text : {
+    type: String,
+    required: 'You must supply a comment'
+  },
+  author : { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
+    required: 'Author ID is required'
   }
+}, {
+  timestamps: true
 });
+
 module.exports = mongoose.model('Comment', commentSchema);
