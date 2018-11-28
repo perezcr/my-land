@@ -4,7 +4,7 @@
 
 ## Live Demo
 
-To see the app in action, go to [https://mylandweb.herokuapp.com/](https://mylandweb.herokuapp.com/)
+Check out the [live application here](https://mylandweb.herokuapp.com/)
 
 ## Covered Concepts
 
