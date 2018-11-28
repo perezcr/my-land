@@ -1,0 +1,13 @@
+<% include ./partials/header %>
+
+<div class="container">
+  <div class="card p-5 m-4">
+    <h2 class="text-danger display-3">
+      <%= errorDetails.status %>:
+      <span class="display-4"><%= errorDetails.message %></span>
+    </h2>
+    <pre class="error"><%- errorDetails.stackHighlighted %></pre>
+  </div>
+</div>
+
+<% include ./partials/footer %>
