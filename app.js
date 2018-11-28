@@ -1,95 +1,102 @@
-if(process.env.NODE_ENV !== 'production'){
-  require('dotenv').config();
-}
-const express         = require('express');
-const path            = require('path');
-const logger          = require('morgan');
-const bodyParser      = require('body-parser');
-const mongoose        = require('mongoose');
-const flash           = require('connect-flash');
-const passport        = require('passport');
-const methodOverride  = require('method-override');
-const compression     = require('compression');
-const helmet          = require('helmet');    
-const seedDB          = require('./config/seed');
+const express = require('express');
+const session = require('express-session');
+const path = require('path');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const flash = require('connect-flash');
+const methodOverride = require('method-override');
+const favicon = require('serve-favicon');
+const compression = require('compression');
+const helmet = require('helmet');    
+const routes = require('./routes');
+const errorHandlers = require('./handlers/errorHandlers');
+require('./handlers/passport');
 
-// Routes
-const indexRoutes         = require('./routes/index');
-const landscapesRoutes    = require('./routes/landscapes');
-const commentRoutes       = require('./routes/comments');
-const userRoutes          = require('./routes/users');
-const notificationRoutes  = require('./routes/notifications');
-
-// Create the Express application object
+// Create our Express app
 const app = express();
 
+// Helmet helps you secure your Express apps by setting various HTTP headers.
 app.use(helmet());
   
-// Set up mongoose connection
-const devDbUrl = 'mongodb://localhost:27017/my_land';
-const mongoDB = process.env.MONGODB_URLI || devDbUrl;
-mongoose.connect(mongoDB, { useCreateIndex: true, useNewUrlParser: true });
-mongoose.set('useFindAndModify', false);
-
 // View engine setup
-app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')) // this is the folder where we keep our ejs files
+app.set('view engine', 'ejs'); // we use the engine EJS
 
-app.use(logger('dev'));
-app.use(bodyParser.urlencoded({extended: true}));
+// app.use() : Whatever function we provide to it will be called on every route 
+// Serves up static files from the public folder. Anything in public/ will just be served up as the file it is
 app.use(express.static(path.join(__dirname, 'public')));
+
+// A favicon is a visual cue that client software, like browsers, use to identify a site.
+app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
+
+// Takes the raw requests and turns them into usable properties on req.body
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// HTTP request logger middleware for node.js
+app.use(logger('dev'));
+
+// Lets you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it
 app.use(methodOverride('_method'));
-app.use(flash()); 
+
+// The flash middleware let's us use req.flash('error', 'Shit!'), which will then pass that message to the next page the user requests
 // The message don't persist on every single request, it's only one time, for this reason is called flash
 // Note about flash
-// Work before res.redirect()
+// res.redirect()
 //    req.flash('info', 'Flash is back!')
 //    res.redirect('/');
-// And res.render()
+// res.render()
 //    res.render('index', { messages: req.flash('info') });
-//
-//seedDB();
+app.use(flash()); 
 
-// Moment JS for Date
-app.locals.moment = require('moment');
-
-// PASSPORT CONFIGURATION
-require('./config/passport')(passport); // pass passport for configuration
-app.use(require('express-session')({
-   secret: 'Node.js is great!',
-   resave: false,
-   saveUninitialized: false
+// Sessions allow us to store data on visitors from request to request
+// This keeps users logged in and allows us to send flash messages
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false
 })); 
+
+// Passport JS is what we use to handle our logins
 app.use(passport.initialize());
 app.use(passport.session());
 
-/** middleware */
-/** app.use: whatever function we provide to it will be called on every route 
- *  we want to do is pass that request at user to every single template
-*/
-const User = require('./models/user');
+// Pass variables to our templates + all requests
+// We want to do is pass that request at user to every single template
+const { getNotificacionsNotRead } = require('./controllers/notificationController');
 app.use(async function(req, res, next){
-   // currentUser is acessible in each template
-   res.locals.currentUser = req.user;
-   if(req.user) {
-    try {
-      let user = await User.findById(req.user._id).populate({ path: 'notifications', match: { isRead: false } }).exec();
-      res.locals.notifications = user.notifications.reverse();
-    } catch(err) {
-      console.log(err.message);
-    }
-   }
-   res.locals.success = req.flash('success');
-   res.locals.error = req.flash('error');
-   next();
+  // res.locals.x is acessible in each template
+  res.locals.currentUser = req.user || undefined;
+  res.locals.moment = require('moment'); // Moment JS for Date
+  res.locals.notifications = await getNotificacionsNotRead(req.user);
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
 });
 
-app.use(compression()); // Compress all routes
+// Compress all routes
+app.use(compression()); 
 
-app.use('/', indexRoutes);
-app.use('/landscapes', landscapesRoutes);
-app.use('/landscapes/:id/comments', commentRoutes);
-app.use('/users', userRoutes);
-app.use('/users/:id/notifications', notificationRoutes);
+// Handle routes
+app.use('/', routes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => { console.log(`Listening on ${PORT}`); });
+// If that above routes didnt work, we 404 them and forward to error handler
+app.use(errorHandlers.notFound);
+
+// One of our error handlers will see if these errors are just validation errors
+app.use(errorHandlers.flashValidationErrors);
+
+// One of our error handlers will see if these errors are mongoose-local errors
+app.use(errorHandlers.mongooseLocalErrors);
+
+// Otherwise this was a really bad error we didn't expect! Shoot eh
+if (app.get('env') === 'development') {
+  // Development Error Handler - Prints stack trace
+  app.use(errorHandlers.developmentErrors)
+}
+
+// Production error handler
+app.use(errorHandlers.productionErrors)
+
+// Done! we export it so we can start the site in start.js
+module.exports = app;
