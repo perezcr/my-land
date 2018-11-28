@@ -1,150 +1,106 @@
-const Landscape     = require('../models/landscape');
-const User          = require('../models/user');
-const Notification  = require('../models/notification');
-const geocoder      = require('mapbox-geocoding');
-const cloudinary    = require('../config/cloudinary');
-
-// Geocoder Configuration
-geocoder.setAccessToken(process.env.GEOCODER_TOKEN);
+const mongoose = require('mongoose');
+const Landscape = mongoose.model('Landscape');
+const User = mongoose.model('User');
+const Notification = mongoose.model('Notification');
+const cloudinary = require('../handlers/cloudinary');
 
 // Display all landscapes on GET
-exports.landscapeIndex = function(req, res){
-  Landscape.find({}, (err, landscapes) => {
-    if(err){
-      console.log(err);
-    } else{
-      res.render("landscapes/index", { landscapes: landscapes, page: 'landscapes'});
-    }
-  });
+exports.getLandscapes = async (req, res) => {
+  const landscapes = await Landscape.find({});
+  res.render("landscapes/index", { landscapes, page: 'landscapes'});
 };
 
 // Display landscape new form on GET
-exports.landscapeNew = (req, res) => res.render("landscapes/new");
+exports.addLandscapeForm = (req, res) => res.render("landscapes/new", { key: process.env.GEOCODER_TOKEN });
 
 // Handle landscape create on POST
-exports.landscapeCreate = function(req, res){
-  // ****** GEOCODER ******
-  // Get data from form and add to landscapes array
-  geocoder.geocode('mapbox.places', req.body.landscape.location, async function(err, geoData){
-    try {
-      if(err){
-        req.flash('error', err.message);
-        res.redirect('back');
-      }
-      if (!geoData.features.length) {
-        req.flash('error', 'Location not valid');
-        return res.redirect('back');
-      }
-      [req.body.landscape.lng, req.body.landscape.lat] = geoData.features[0].center;
+exports.createLandscape = async (req, res) => {
+  const { public_id, secure_url } = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'});
+  req.body.landscape.author = req.user._id;
+  req.body.landscape.image = { id: public_id, content: secure_url };
 
-      let result = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'});
-      // add cloudinary url for the image to the landscape object under image property
-      req.body.landscape.image = {
-        id: result.public_id,
-        content: result.secure_url
-      };
-      // add author to campground
-      req.body.landscape.author = {
-        id: req.user._id,
-        username: req.user.username
-      };
-
-      const landscapePromise = Landscape.create(req.body.landscape);
-      const userPromise = User.findById(req.user._id).populate('followers').exec();
-
-      const [landscape, user] = await Promise.all([landscapePromise, userPromise]);
-      for(const follower of user.followers) {
-        let notification = await Notification.create({
-          username: user.username,
-          avatar: user.avatar.content,
-          type: 'Landscape',
-          landscapeId: landscape._id
-        });
-        follower.notifications.push(notification);
-        follower.save();
-      }
-      // redirect back to landscapes page
-      req.flash('success', 'Landscape was created');
-      res.redirect(`/landscapes/${landscape.id}`);       
-    } catch (err) {
-      req.flash('error', err.message);
-      res.redirect('back');  
-    }
-  });
+  const landscapePromise = Landscape.create(req.body.landscape);
+  const userPromise = User.findById(req.user._id).populate('followers');
+  const [landscape, user] = await Promise.all([landscapePromise, userPromise]);
+  for (let follower of user.followers) {
+    const notification = await Notification.create({
+      user: user._id,
+      type: 'Landscape',
+      landscape: landscape._id
+    });
+    follower.notifications.push(notification);
+    await follower.save();
+  }
+  // redirect back to landscapes page
+  req.flash('success', 'Landscape was created ✅');
+  res.redirect(`/landscapes/${landscape.id}`);
 };
 
 // Display detail page for a specific landscape on GET
-exports.landscapeShow = function(req, res){
-  // Find the landscape with provided ID
-  Landscape.findById(req.params.id).populate('comments').exec(function(err, landscape){
-    if(err || !landscape){
-      req.flash('error', 'Landscape not found');
-      res.redirect("/landscapes");
-    } else{
-      res.render('landscapes/show', { landscape: landscape, key: process.env.GEOCODER_TOKEN });
-    }
+exports.showLandscape = async (req, res) => {
+  const landscape = await Landscape.findById(req.params.id).populate({
+    path: 'comments',
+    populate: { path: 'author' }
+  }).populate({
+    path: 'reviews',
+    populate: { path: 'author' },
+    options: { sort: { createdAt: -1 }}
   });
+  if (!landscape) {
+    req.flash('error', 'Landscape not found ❌');
+    return res.redirect("/landscapes");
+  }
+  res.render('landscapes/show', { landscape, key: process.env.GEOCODER_TOKEN });
 };
 
 // Display landscape update form on GET
-exports.landscapeEdit = function(req, res){
-  Landscape.findById(req.params.id, (err, landscape) => {
-    res.render('landscapes/edit', { landscape: landscape });   
-  });
+exports.editLandscapeForm = async (req, res) => {
+  const landscape = await Landscape.findById(req.params.id);
+  res.render('landscapes/edit', { landscape, key: process.env.GEOCODER_TOKEN });   
 };
 
 // Handle landscape update on PUT.
-exports.landscapeUpdate = function(req, res){ 
-  Landscape.findById(req.params.id, function(err, landscape){  
-    if(err){
-      req.flash('error', err.message);
-      return res.redirect('back');
-    }
-    geocoder.geocode('mapbox.places', req.body.location, async function(err, geoData){
-      if (err || !geoData.features.length) {
-        req.flash('error', 'Location not valid');
-        return res.redirect('back');
-      }
-      if(req.file){
-        try {
-          await cloudinary.uploader.destroy(landscape.image.id);
-          let result = await cloudinary.uploader.upload(req.file.path, {folder: 'myland/landscape'});
-          landscape.image = {
-            id: result.public_id,
-            content: result.secure_url
-          };
-        } catch(err) {
-          req.flash('error', err.message);
-          return res.redirect('back');
-        }
-      }
-      landscape.name = req.body.name;
-      landscape.entranceFee = req.body.entranceFee;
-      landscape.location = req.body.location;
-      [landscape.lng, landscape.lat] = geoData.features[0].center;
-      landscape.description = req.body.description;
-      landscape.save();
-      req.flash('success', 'The landscape was updated');
-      res.redirect('/landscapes/' + landscape._id);
-    });
-  });
+exports.updateLandscape = async (req, res) => {
+  if (req.file) {
+    await deleteUploadedImage(req.params.id);
+    const { public_id, secure_url} = await cloudinary.uploader.upload(req.file.path, { folder: 'myland/landscape' });
+    req.body.landscape.image = { id: public_id, content: secure_url };
+  }
+  const landscape = await Landscape.findOneAndUpdate({ _id: req.params.id }, { $set: req.body.landscape }, { 
+    new: true, 
+    runValidators: true 
+  }).exec();
+  req.flash('success', 'The landscape was updated ✅');
+  res.redirect(`/landscapes/${landscape._id}`);
 };
 
 // Handle landscape delete on DELETE.
-exports.landscapeDestroy = function(req, res){
-  Landscape.findById(req.params.id, async function(err, landscape){
-    if(err){
-      req.flash('error', err.message);
-      return res.redirect('/landscapes');
-    }
-    try {
-      await cloudinary.uploader.destroy(landscape.image.id);
-      landscape.remove();
-      req.flash('success', 'The landscape was deleted');
-      res.redirect('/landscapes');
-    } catch (error) {
-      req.flash("error", err.message);
-      return res.redirect("back");
-    }
+exports.deleteLandscape = async (req, res) => {
+  const landscape = await Landscape.findById(req.params.id);
+  await landscape.remove();
+  req.flash('success', 'The landscape was deleted ✅');
+  res.redirect('/landscapes');
+};
+
+// Middleware check ownership
+exports.checkLandscapeOwnership = async (req, res, next) => { 
+  const landscape = await Landscape.findById(req.params.id);
+  if (!landscape) {
+    req.flash('error', 'Landscape not found ❌');
+    return res.redirect('/landscapes');
+  }
+  if (landscape.author.equals(req.user._id) || req.user.isAdmin) {
+    return next();
+  }
+  req.flash('error', 'You don\'t have permission 🚫');
+  res.redirect('/landscapes');
+};
+
+// Delete uploaded image from cloudinary
+function deleteUploadedImage(id){
+  return new Promise((resolve, reject) => {
+    Landscape.findById(id).then(landscape => {
+      resolve(cloudinary.uploader.destroy(landscape.image.id));  
+    });   
   });
 };

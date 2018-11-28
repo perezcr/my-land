@@ -1,63 +1,63 @@
-const Comment       = require('../models/comment');
-const Landscape     = require('../models/landscape');
-const User          = require('../models/user');
-const Notification  = require('../models/notification');
+const mongoose = require('mongoose');
+const Comment = mongoose.model('Comment');
+const Landscape = mongoose.model('Landscape');
+const User = mongoose.model('User');
+const Notification = mongoose.model('Notification');
 
 // Handle comment create on POST
-exports.commentCreate = async function(req, res){
-  try {
-    let landscape = await Landscape.findById(req.params.id);
-    if(!landscape){
-      req.flash('error', 'Landscape not found');
-      return res.redirect(`/landscapes/${req.params.id}`);
-    }
-    let comment = await Comment.create({
-      text: req.body.text,
-      author: { id: req.user._id, username: req.user.username }
-    });
-    landscape.comments.push(comment);
-    landscape.save();
-    if(!landscape.author.id.equals(req.user._id)) {
-      let user = await User.findById(landscape.author.id);
-      let notification = await Notification.create({
-        username: req.user.username,
-        avatar: req.user.avatar.content,
-        type: 'Comment',
-        landscapeId: landscape._id
-      });
-      user.notifications.push(notification);
-      user.save();  
-    }
-    req.flash('success', 'The comment was created');
-    res.redirect(`/landscapes/${req.params.id}`);
-  } catch (err) {
-    req.flash('error', err);
-    res.redirect(`/landscapes/${req.params.id}`);
+exports.createComment = async (req, res) => {
+  const landscape = await Landscape.findById(req.params.id);
+  if (!landscape) {
+    req.flash('error', 'Landscape not found ❌');
+    return res.redirect(`/landscapes/${req.params.id}`);
   }
+  const comment = await Comment.create({
+    text: req.body.text,
+    author: req.user._id
+  });
+  landscape.comments.push(comment);
+  await landscape.save();
+  if (!landscape.author._id.equals(req.user._id)) {
+    const userPromise = User.findById(landscape.author._id);
+    const notificationPromise = Notification.create({
+      user: req.user._id,
+      type: 'Comment',
+      landscape: landscape._id
+    });
+    const [user, notification] = await Promise.all([userPromise, notificationPromise]);
+    user.notifications.push(notification);
+    await user.save();  
+  }
+  req.flash('success', 'The comment was created ✅');
+  res.redirect(`/landscapes/${req.params.id}`);
 };
 
 // Handle comment update on PUT.
-exports.commentUpdate = function(req, res){
-  Comment.findOneAndUpdate({ _id: req.params.comment_id }, req.body.comment, (err, comment) => {
-    if(err){
-      req.flash('error', err);
-      res.redirect('back');
-    } else{
-      req.flash('success', 'The comment was updated');
-      res.redirect('/landscapes/' + req.params.id);
-    }
-  });
+exports.updateComment = async (req, res) => {
+  await Comment.findOneAndUpdate({ _id: req.params.comment_id }, req.body.comment, { new: true, runValidators: true });
+  req.flash('success', 'The comment was updated ✅');
+  res.redirect(`/landscapes/${req.params.id}`);
 };
 
 // Handle comment delete on DELETE.
-exports.commentDestroy = function(req, res){
-  Comment.findOneAndDelete({ _id: req.params.comment_id }, (err) => {
-    if(err) {
-      req.flash('error', err);
-      res.redirect('back');
-    } else {
-      req.flash('success', 'The comment was deleted');
-      res.redirect('back');
-    }
-  });
+exports.deleteComment = async (req, res) => {
+  const commentPromise = Comment.findOneAndDelete({ _id: req.params.comment_id });
+  const landscapePromise = Landscape.findOneAndUpdate({ _id: req.params.id }, { $pull: { comments: req.params.comment_id } }, { new: true });
+  await Promise.all([commentPromise, landscapePromise])
+  req.flash('success', 'The comment was deleted ✅');
+  res.redirect(`/landscapes/${req.params.id}`);
+};
+
+// Middleware check ownership
+exports.checkCommentOwnership = async (req, res, next) => {
+  const comment = await Comment.findById(req.params.comment_id);
+  if (!comment) {
+    req.flash('error', 'Comment not found ❌');
+    return res.redirect(`/landscapes/${req.params.id}`);
+  }
+  if (comment.author.equals(req.user._id) || req.user.isAdmin) {
+    return next();
+  }
+  req.flash('error', 'You don\'t have permission 🚫');
+  res.redirect(`/landscapes/${req.params.id}`);
 };
