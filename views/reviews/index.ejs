@@ -1,0 +1,145 @@
+<% include ../partials/header %>
+
+<div class="container">
+  <div class="row my-4">
+    <div class="col-12">
+      <h4 class="text-dark mb-3">Reviews of <%= landscape.name %></h4>
+      <!--REVIEW SECTION START-->
+      <div class="card p-3 shadow-sm">
+        <% if (landscape.rating !== 0) { %>
+        <div class="h4 text-center">
+          <i class="fas fa-star checked"></i>
+          <i class="fas fa-star <%= (landscape.rating > 1.5) ? 'checked' : '' %>"></i>
+          <i class="fas fa-star <%= (landscape.rating > 2.5) ? 'checked' : '' %>"></i>
+          <i class="fas fa-star <%= (landscape.rating > 3.5) ? 'checked' : '' %>"></i>
+          <i class="fas fa-star <%= (landscape.rating > 4.5) ? 'checked' : '' %>"></i>
+        </div>         
+        <h5 class="text-center border-bottom border-gray pb-2 mb-0"><span class="text-primary"><%= landscape.rating.toFixed(2) %></span> average based on <span class="text-primary"><%= landscape.reviews.length %></span> reviews</h5>    
+        <% landscape.reviews.forEach(review => { %>
+        <div class="media text-muted pt-3">
+          <div class="mr-3">
+            <%- '<i class="fas fa-star checked"></i>'.repeat(review.rating) %>
+            <%- '<i class="fas fa-star"></i>'.repeat(5 - review.rating) %>
+          </div>
+          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <strong class="text-gray-dark"><%= review.text %></strong>
+              <%= moment(review.updatedAt).fromNow() %>
+            </div>
+            <span class="d-block">Review by: <strong><%= review.author.username %></strong></span>
+            <% if(currentUser && review.author._id.equals(currentUser._id)){ %>
+            <div class="btn-group mt-2">
+              <!--Edit button used for collapsing the edit comment form-->
+              <a class="btn btn-xs btn-outline-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= review._id %>"
+                aria-expanded="false" aria-controls="collapse<%= review._id %>">Edit</a>
+              <!-- Delete review button -->
+              <button type="button" class="btn btn-xs btn-outline-danger" data-toggle="modal" data-target="#modalDelete<%= review._id %>">Delete</button>
+            </div>
+
+            <!--Modal Delete Review Start-->
+            <div class="modal fade" id="modalDelete<%= review._id %>" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel<%= review._id %>"
+              aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalDeleteLabel<%= review._id %>">Delete Review</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    Do you want to delete the review?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <form action="/landscapes/<%= landscape._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                      <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--Modal Delete Review End-->
+            <!--Collapse EDIT Review Form START-->
+            <div class="collapse mt-3" id="collapseEdit<%= review._id %>">
+              <div class="card card-body border-left-warning">
+                <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Edit Review</h6>
+                <form action="/landscapes/<%= landscape._id %>/reviews/<%= review._id %>?_method=PUT" method="POST">
+                  <div class="stars mx-auto">
+                    <input class="star star-5" id="star-5" type="radio" name="review[rating]" value="5" <%=review.rating===5
+                      ? 'checked' : '' %>>
+                    <label class="star star-5" for="star-5"></label>
+                    <input class="star" id="star-4" type="radio" name="review[rating]" value="4" <%=review.rating===4 ?
+                      'checked' : '' %>>
+                    <label class="star" for="star-4"></label>
+                    <input class="star" id="star-3" type="radio" name="review[rating]" value="3" <%=review.rating===3 ?
+                      'checked' : '' %>>
+                    <label class="star" for="star-3"></label>
+                    <input class="star" id="star-2" type="radio" name="review[rating]" value="2" <%=review.rating===2 ?
+                      'checked' : '' %>>
+                    <label class="star" for="star-2"></label>
+                    <input class="star star-1" id="star-1" type="radio" name="review[rating]" value="1" <%=review.rating===1
+                      ? 'checked' : '' %>>
+                    <label class="star star-1" for="star-1"></label>
+                  </div>
+                  <div class="form-group">
+                    <label class="sr-only" for="review-new-text">Text</label>
+                    <textarea id="review-new-text" class="form-control" name="review[text]" placeholder="Write your review..."
+                      rows="5" autofocus><%= review.text %></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-outline-warning btn-sm">Edit review <i class="far fa-check-circle"></i></button>
+                </form>
+              </div>
+            </div>
+            <!--Collapse EDIT Review Form END-->
+            <% } %>
+          </div>
+        </div>
+        <% }); %>
+        <% } else { %>
+          <h5 class="text-center text-muted font-italic">No reviews yet.</h5>
+        <% } %>
+        <div class="d-flex justify-content-between align-items-center w-100 mt-3">
+          <a class="btn btn-outline-danger btn-sm" href="/landscapes/<%= landscape._id %>"><i class="fas fa-chevron-circle-left"></i> Go back</a>
+          <% if ( currentUser && !landscape.reviews.some(review => { return review.author._id.equals(currentUser._id) })) { %>
+          <a class="btn btn-outline-primary btn-sm new-button" role="button" data-toggle="collapse" href="#collapseReview"
+            aria-expanded="false" aria-controls="collapseReview">
+            <i class="fas fa-plus" aria-hidden="true"></i> Write a New Review</a>
+          <% } %>
+        </div>
+
+        <!--Collapse Add Review Form START-->
+        <div class="collapse mt-3" id="collapseReview">
+          <div class="card card-body border-left-primary">
+            <!--If the user is logged in, show the new review form-->
+            <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Add Review</h6>
+            <form action="/landscapes/<%= landscape._id %>/reviews" method="POST">
+              <div class="stars mx-auto">
+                <input class="star star-5" id="star-5" type="radio" name="rating" value="5">
+                <label class="star star-5" for="star-5"></label>
+                <input class="star" id="star-4" type="radio" name="rating" value="4">
+                <label class="star" for="star-4"></label>
+                <input class="star" id="star-3" type="radio" name="rating" value="3">
+                <label class="star" for="star-3"></label>
+                <input class="star" id="star-2" type="radio" name="rating" value="2">
+                <label class="star" for="star-2"></label>
+                <input class="star star-1" id="star-1" type="radio" name="rating" value="1">
+                <label class="star star-1" for="star-1"></label>
+              </div>
+              <div class="form-group">
+                <label class="sr-only" for="review-new-text">Text</label>
+                <textarea id="review-new-text" class="form-control" name="text" placeholder="Write your review..." rows="5"
+                  autofocus></textarea>
+              </div>
+              <button type="submit" class="btn btn-outline-primary btn-sm">Submit review <i class="far fa-check-circle"></i></button>
+            </form>
+          </div>
+        </div>
+        <!--Collapse Add Review Form END-->
+      </div>
+      <!--REVIEW SECTION END-->   
+    </div>
+  </div>
+</div>
+
+<% include ../partials/footer %>

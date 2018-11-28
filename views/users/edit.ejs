@@ -1,6 +1,6 @@
 <% include ../partials/header %>
-<div class="row my-6">
-
+<div class="row my-3">
+  <!-- USER AVATAR START -->
   <div class="mx-auto col-md-5 col-sm-7 col-10">
     <div class="card shadow-sm mb-3">
       <img id="avatar" src="<%= user.avatar.content %>" class="card-img-top user-avatar" alt="User Avatar">
@@ -16,13 +16,18 @@
               <button type="submit" class="btn btn-outline-success" id="uploadFile" disabled>Upload</button>
             </div>
           </div>
-        </form>      
-      </div>
+        </form>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <a class="btn btn-outline-danger btn-sm" href="/users/<%= user._id %>"><i class="fas fa-chevron-circle-left"></i> Go back</a>
+        </div>    
+      </div>   
     </div>
   </div>
-
+  <!-- USER AVATAR END -->
+  <!-- USER EDIT START -->
   <div class="mx-auto col-md-5 col-sm-7 col-10">
     <div class="accordion" id="accordionUser">
+      <!-- USER GENERAL INFO START -->
       <div class="card shadow-sm">
         <div class="card-header" id="headingOne">
           <div class="d-flex justify-content-between align-items-center">
@@ -30,7 +35,7 @@
             <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#collapseOne"
               aria-expanded="true" aria-controls="collapseOne">
               Edit
-            </button>              
+            </button>
           </div>
         </div>
         <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionUser">
@@ -57,11 +62,12 @@
                   placeholder="About me..."><%= user.aboutme %></textarea>
               </div>
               <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-check"></i> Save</button>
-              <button class="btn btn-sm btn-warning" type="reset"><i class="fas fa-sync-alt"></i> Reset</button>
             </form>
           </div>
         </div>
       </div>
+      <!-- USER GENERAL INFO END -->
+      <!-- USER PASSWORD START -->
       <div class="card shadow-sm">
         <div class="card-header" id="headingTwo">
           <div class="d-flex justify-content-between align-items-center">
@@ -69,8 +75,8 @@
             <button class="btn btn-sm btn-outline-secondary collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo"
               aria-expanded="false" aria-controls="collapseTwo">
               Edit
-            </button>           
-          </div>               
+            </button>
+          </div>
         </div>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionUser">
           <div class="card-body">
@@ -81,21 +87,21 @@
               </div>
               <div class="form-group">
                 <label for="user-edit-new-password" class="col-form-label"><strong>New</strong></label>
-                <input id="user-edit-new-password" type="password" class="form-control" name="new" placeholder="New password" required>
+                <input id="user-edit-new-password" type="password" class="form-control" name="newPassword" placeholder="New password" required>
               </div>
               <div class="form-group">
                 <label for="user-edit-retype-password" class="col-form-label"><strong>Re-type new</strong></label>
-                <input id="user-edit-retype-password" type="password" class="form-control" name="retypeNew" placeholder="Re-type password" required>
+                <input id="user-edit-retype-password" type="password" class="form-control" name="confirm" placeholder="Re-type password" required>
               </div>
               <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-check"></i> Save</button>
-              <button class="btn btn-sm btn-warning" type="reset"><i class="fas fa-sync-alt"></i> Reset</button>
             </form>
           </div>
         </div>
       </div>
+      <!-- USER PASSWORD END -->
     </div>
   </div>
-
+  <!-- USER EDIT END -->
 </div>
 <script>
   $('#inputGroupFile').change(function (e) {

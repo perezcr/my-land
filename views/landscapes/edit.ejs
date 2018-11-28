@@ -1,5 +1,6 @@
 <% include ../partials/header %>
-<div class="row my-6">
+<div id='map' style="width:100%; height: 200px;"></div>
+<div class="row my-3">
   <div class="col-md-12 text-center mb-3">
     <h1>Edit: <%=landscape.name%></h1>    
   </div>
@@ -7,19 +8,16 @@
     <form action="/landscapes/<%= landscape._id %>?_method=PUT" method="POST" autocomplete="off" enctype="multipart/form-data">
       <div class="form-group">
         <label for="landscape-edit-name" class="col-form-label"><strong>Name</strong></label>
-        <input id="landscape-edit-name" class="form-control" type="text" name="name" value="<%= landscape.name %>" maxlength="50" autofocus required>
+        <input id="landscape-edit-name" class="form-control" type="text" name="landscape[name]" value="<%= landscape.name %>" maxlength="50" autofocus required>
       </div>
-      <div class="form-group">
-        <label for="landscape-edit-location" class="col-form-label"><strong>Location</strong></label>
-        <input id="landscape-edit-location" class="form-control" type="text" name="location" value="<%= landscape.location %>" maxlength="50" required>
+      <div id="geocoder" class="form-group">
+        <label class="col-form-label"><strong>Location</strong></label>
       </div>
-      <div class="form-group">
-        <label for="landscape-edit-price" class="col-form-label"><strong>Entrance Fee</strong></label>
-        <input id="landscape-edit-price" class="form-control" type="number" name="entranceFee" value="<%= landscape.entranceFee %>" min="0.1" step="0.1">
-      </div>
+      <input id="lat" type="hidden" name="landscape[lat]" value="<%= landscape.lat %>">
+      <input id="lng" type="hidden" name="landscape[lng]" value="<%= landscape.lng %>">
       <div class="form-group">
         <label for="landscape-edit-description" class="col-form-label"><strong>Description</strong></label>
-        <textarea class="form-control" name="description" id="landscape-edit-description" rows="5" maxlength="600"><%= landscape.description %></textarea>
+        <textarea class="form-control" name="landscape[description]" id="landscape-edit-description" rows="5" maxlength="600"><%= landscape.description %></textarea>
       </div>
       <div class="form-group">      
         <div class="custom-file">
@@ -34,10 +32,71 @@
     </div>
   </div>
 </div>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css'/>
 <script>
   $('#inputGroupFile').change(function(e){
-    let fileName = e.target.files[0].name;
+    const fileName = e.target.files[0].name;
     if(fileName) $('.custom-file-label').html(fileName);
+  });
+
+  // Mapbox
+  mapboxgl.accessToken = '<%= key %>';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/outdoors-v10',
+    center: [-76.1954, 4.0848],
+    zoom: 8,
+    interactive: false
+  });
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken
+  });
+
+  document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+  $('.mapboxgl-ctrl-geocoder').css({
+    'width': '100%',
+    'max-width': '100%'
+  });
+  $( '.mapboxgl-ctrl-geocoder input' ).attr({
+    'name': 'landscape[location]',
+    'value': '<%= landscape.location %>',
+    'required': true
+  });
+
+  map.on('load', function() {
+    map.addSource('single-point', {
+      "type": "geojson",
+      "data": {
+          "type": "FeatureCollection",
+          "features": []
+      }
+    });
+
+    map.addLayer({
+      "id": "point",
+      "source": "single-point",
+      "type": "circle",
+      "paint": {
+          "circle-radius": 10,
+          "circle-color": "#007cbf"
+      }
+    });
+
+    // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
+    // makes a selection and add a symbol that matches the result.
+    geocoder.on('result', function(ev) {
+      map.getSource('single-point').setData(ev.result.geometry);
+      $('.mapboxgl-ctrl-geocoder input').attr({
+        'value': ev.result.place_name
+      });
+      $('#lng').attr('value', ev.result.center[0])
+      $('#lat').attr('value', ev.result.center[1])
+    });
   });
 </script>
 <% include ../partials/footer %>

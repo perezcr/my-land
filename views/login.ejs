@@ -1,5 +1,5 @@
 <% include ./partials/header.ejs %>
-<div class="row my-6">
+<div class="row my-3">
   <div class="col-md-12 text-center mb-3">
     <h1>Sign In</h1>
   </div>
@@ -32,7 +32,7 @@
       <button class="btn btn-link" data-toggle="modal" data-target="#forgotPassword">Forgot Password</button> | 
       <a href="/landscapes">Go Back</a>
     </div>
-    <!-- Modal -->
+    <!-- MODAL FORGOT START -->
     <div class="modal fade" id="forgotPassword" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -42,22 +42,22 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <form id="forgotForm" action="/forgot" method="POST">
+          <form action="/users/forgot" method="POST">
+            <div class="modal-body">         
               <div class="form-group">
                 <label for="forgot-email" class="col-form-label"><strong>Email</strong></label>
-                <input id="forgot-email" class="form-control" type="text" name="email" placeholder="user@email.com" maxlength="80" required>
+                <input id="forgot-email" class="form-control" type="email" name="email" placeholder="user@email.com" maxlength="100" required>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary" form="forgotForm">Submit</button>
-          </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-
+    <!-- MODAL FORGOT END -->
   </div>
 </div> 
 <% include ./partials/footer.ejs %>

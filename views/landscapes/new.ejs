@@ -1,5 +1,6 @@
-<% include ../partials/header %> 
-<div class="row my-6">
+<% include ../partials/header %>
+<div id='map' style="width:100%; height: 200px;"></div>
+<div class="row my-3">
   <div class="col-md-12 text-center mb-3">
     <h1>New Landscape</h1>
   </div>
@@ -9,14 +10,11 @@
         <label for="landscape-new-name" class="col-form-label"><strong>Name</strong></label>
         <input id="landscape-new-name" class="form-control" type="text" name="landscape[name]" placeholder="Yosemite National Park" maxlength="50" autofocus required>
       </div>
-      <div class="form-group">
-        <label for="landscape-new-location" class="col-form-label"><strong>Location</strong></label>
-        <input id="landscape-new-location" class="form-control" type="text" name="landscape[location]" placeholder="Yosemite National Park, California, USA" maxlength="50" required>
+      <div id="geocoder" class="form-group">
+        <label class="col-form-label"><strong>Location</strong></label>
       </div>
-      <div class="form-group">
-        <label for="landscape-new-entrance" class="col-form-label"><strong>Entrance Fee (Optional)</strong></label>
-        <input id="landscape-new-entrance" class="form-control" type="number" name="landscape[entranceFee]" placeholder="9.99" min="0.1" step="0.1">
-      </div>
+      <input id="lat" type="hidden" name="landscape[lat]">
+      <input id="lng" type="hidden" name="landscape[lng]">
       <div class="form-group">
         <label for="landscape-new-description" class="col-form-label"><strong>Description (Optional)</strong></label>
         <textarea id="landscape-new-description" class="form-control" rows="5" name="landscape[description]" placeholder="Description" maxlength="600"></textarea>
@@ -27,17 +25,77 @@
           <label class="custom-file-label" for="inputGroupFile">Choose Image</label>
         </div>
       </div>
-      <button class="btn btn-primary btn-block">Add</button>
+      <button class="btn btn-primary btn-block">Add</button>   
     </form>
     <div class="login-help text-center mt-3">
         <a href="/landscapes">Go Back</a>
     </div>
   </div>      
 </div>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css'/>
 <script>
   $('#inputGroupFile').change(function(e){
-    let fileName = e.target.files[0].name;
+    const fileName = e.target.files[0].name;
     if(fileName) $('.custom-file-label').html(fileName);
+  });
+
+  // Mapbox
+  mapboxgl.accessToken = '<%= key %>';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/outdoors-v10',
+    center: [-76.1954, 4.0848],
+    zoom: 8,
+    interactive: false
+  });
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken
+  });
+
+  document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+  $('.mapboxgl-ctrl-geocoder').css({
+    'width': '100%',
+    'max-width': '100%'
+  });
+  $( '.mapboxgl-ctrl-geocoder input' ).attr({
+    'name': 'landscape[location]',
+    'required': true
+  });
+
+  map.on('load', function() {
+    map.addSource('single-point', {
+      "type": "geojson",
+      "data": {
+          "type": "FeatureCollection",
+          "features": []
+      }
+    });
+
+    map.addLayer({
+      "id": "point",
+      "source": "single-point",
+      "type": "circle",
+      "paint": {
+          "circle-radius": 10,
+          "circle-color": "#007cbf"
+      }
+    });
+
+    // Listen for the `result` event from the MapboxGeocoder that is triggered when a user
+    // makes a selection and add a symbol that matches the result.
+    geocoder.on('result', function(ev) {
+      map.getSource('single-point').setData(ev.result.geometry);
+      $('.mapboxgl-ctrl-geocoder input').attr({
+        'value': ev.result.place_name
+      });
+      $('#lng').attr('value', ev.result.center[0])
+      $('#lat').attr('value', ev.result.center[1])
+    });
   });
 </script>
 <% include ../partials/footer %>

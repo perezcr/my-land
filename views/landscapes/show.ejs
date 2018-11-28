@@ -1,37 +1,49 @@
 <% include ../partials/header %>
-<div class="container my-6">
+
+<div class="container">
   <div class="row">
-    <div class="col-md-3">
-      <div class="list-group mb-4">
-        <% if(landscape.entranceFee) { %>
-          <li class="list-group-item list-group-item-light">
-            <h6>Entrance Fee</h6>
-            <p><i class="fas fa-dollar-sign"></i> <%= landscape.entranceFee %></p>
-          </li>
-        <% } %>
-        <li class="list-group-item list-group-item-light">
-          <h6><i class="fas fa-calendar-alt"></i> Published</h6>
-          <small><%= moment(landscape.createdAt).format('MMMM Do YYYY, h:mm a') %></small>
-        </li>
-      </div>
-      <div class="mb-4 shadow-sm" id="map"></div>
+    <!-- MAP SECTION START -->
+    <div class="col-lg-3 mt-3">
+      <div id="map" class="card"></div>
     </div>
-    <div class="col-md-9">
-      <div class="card mb-4 shadow-sm">
+    <!-- MAP SECTION END -->
+    
+    <div class="col-lg-9 my-3">
+      <!--LANDSCAPE SECTION START-->
+      <div class="card shadow-sm">
         <img class="card-img-top" src="<%= landscape.image.content %>" alt="Card Image">
         <div class="card-body">
-          <h4 class="card-title"><%= landscape.name %></h4>
-          <h6 class="card-subtitle mb-2 text-muted">Submitted by <a href="/users/<%= landscape.author.id %>"><%= landscape.author.username %></a></h6>
+          <div class="d-flex justify-content-between align-items-center w-100 text-muted reduce-font">
+            <div>
+              <h4 class="card-title text-dark"><%= landscape.name %></h4>
+              <h6 class="card-subtitle mb-1">Submitted by <a href="/users/<%= landscape.author._id %>"><%= landscape.author.username %></a></h6>
+              <p class="small-text font-italic mb-1"><%= moment(landscape.updatedAt).format('MMMM Do YYYY, h:mm a') %></p>
+            </div>
+            <div>
+              <% if(landscape.rating === 0) { %>           
+                <p class="small-text font-weight-light font-italic mb-0">No reviews yet.</p>
+              <% } else { %>
+                <div class="text-center">
+                  <i class="fas fa-star checked"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 1.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 2.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 3.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 4.5) ? 'checked' : '' %>"></i>
+                </div>         
+                <p class="small-text mb-0 font-weight-bold"><%= landscape.rating.toFixed(2) %> average based on <%= landscape.reviews.length %> reviews</p>
+              <% } %>
+            </div>
+          </div>
           <hr>
           <p class="card-text"><%= landscape.description %></p>
-          <% if(currentUser && landscape.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>          
+          <% if(currentUser && landscape.author._id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>          
             <div class="btn-group" role="group" aria-label="Options">
               <a class="btn btn-sm btn-outline-warning" href="/landscapes/<%= landscape._id %>/edit">Edit</a>
               <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#deleteLandscape">Delete</button>           
             </div>
             <form id="deleteLandscapeForm" action="/landscapes/<%= landscape._id %>?_method=DELETE" method="POST"></form>
 
-            <!-- Modal -->
+            <!--Modal Delete Landcape Start-->
             <div class="modal fade" id="deleteLandscape" tabindex="-1" role="dialog" aria-labelledby="deleteLandscapeLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -51,163 +63,253 @@
                 </div>
               </div>
             </div>
+            <!--Modal Delete Landcape End-->
           <% } %>
         </div>
       </div>
+      <!--LANDSCAPE SECTION END-->
 
-      <!-- COMMENT SECTION START -->
-      <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-          <div class="float-right">
-            <a class="btn btn-outline-success" id="new-comment" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment">
-              <i class="fas fa-plus" aria-hidden="true"></i> Add New Comment</a>
-          </div>
-          <!--Comment section title-->
-          <h4 id="comment-header" class="text-muted clearfix">Comments <i class="fas fa-comments" aria-hidden="true"></i></h4>
-    
-          <!--Collapse Add a comment form START-->
-          <div class="collapse" id="collapseComment">
-            <div class="card card-body border-left-success">
-              <% if(!currentUser) { %>
-                <!--If the user is not logged in, direct him to the login page-->
-                <h6 class="text-secondary">Please login to write comment. <a href="/login">Click here</a> to go to the login page.</h6>
-              <% } %>
-              <% if(currentUser) { %>
-                <!--If the user is logged in, show the new comment form-->
-                <h5 class="text-secondary mb-3">Write your comment <i class="fas fa-pencil-alt" aria-hidden="true"></i></h5>
-                <form action="/landscapes/<%= landscape._id %>/comments" method="POST">
-                  <div class="form-group">
-                    <label class="sr-only" for="comment-new-author">Author</label>
-                    <input id="comment-new-author" class="form-control" type="text" value="<%= currentUser.username %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label class="sr-only" for="comment-new-text">Text</label>
-                    <textarea id="comment-new-text" class="form-control" name="text" placeholder="Write your comment..." rows="5" autofocus required></textarea>
-                  </div>
-                  <button type="submit" class="btn btn-outline-success btn-sm">Comment <i class="fas fa-comment" aria-hidden="true"></i></button>              
-                </form>
-              <% } %>
-            </div>
-          </div>
-          <!--Collapse Add a comment form END-->       
-          <hr>
-    
-          <!--Check if there are comments, if there are none say no comments.-->
-          <% if (landscape.comments.length === 0) { %>
-            <p class="font-italic text-muted">No comments yet.</p>
-          <% } %>
-            
-          <div class="row">
-            <!--Display comments by looping through them-->
-            <% landscape.comments.forEach(function(comment){ %>
-                   
-              <div class="col-md-12 mb-1">
-                <div class="card bg-light shadow-sm">
-                  <div class="card-body">
-                    <!--Show when the comment was made-->
-                    <div class="d-flex justify-content-between">
-                        <h6 class="card-title">
-                          <% if (currentUser && currentUser._id.equals(comment.author.id)) { %>
-                            <!--If the current user owns the comment, change the color of the user icon-->
-                            <i class="fas fa-user text-primary" aria-hidden="true"></i>
-                          <% } else { %>
-                            <!--Else just display it black-->
-                            <i class="fas fa-user" aria-hidden="true"></i>
-                          <% } %>
-                          <!--Print out the author username-->
-                          
-                          <a href="/users/<%= comment.author.id %>"><%= comment.author.username %></a>
-                        </h6>
-                        <p class="text-muted"><%= moment(comment.createdAt).fromNow() %></p>
-                    </div>
-                    
-                    <!--Printing the comment-->
-                    <p class="card-text text-justify"><%= comment.text %></p>
-                    <!--If the visitor is logged in and the owner of the comment or is admin, show the edit and delete buttons-->
-                    <% if(currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
-                      <div class="btn-group mb-2" role="group" aria-label="Options">
-                        <!--Edit button used for collapsing the edit comment form-->
-                        <a class="btn btn-sm btn-outline-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= comment._id %>" aria-expanded="false" aria-controls="collapse<%= comment._id %>">Edit</a>
-                        <!--Delete comment button-->
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#modalDelete<%= comment._id %>">Delete</button>
-                      </div>
-                      
-                      <!-- Modal -->
-                      <div class="modal fade" id="modalDelete<%= comment._id %>" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel<%= comment._id %>" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="modalDeleteLabel<%= comment._id %>">Delete Comment</h5>
-                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                            </div>
-                            <div class="modal-body">
-                              Do you want to delete the comment?
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                              <form action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                              </form>  
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    
-                      <!--Edit comment form-->
-                      <div class="collapse" id="collapseEdit<%= comment._id %>">
-                        <div class="card card-body border-left-warning">
-                          <h5 class="text-secondary mb-3">Edit Comment <i class="fas fa-edit" aria-hidden="true"></i></h4>
-                          <form id="edit-comment-form<%= comment._id %>" action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=PUT" method="POST">
-                            <div class="form-group">
-                              <label class="sr-only" for="comment-edit-author">Author</label>
-                              <input id="comment-edit-author" class="form-control" type="text" value="<%= currentUser.username %>" readonly>
-                            </div>
-                            <div class="form-group">
-                              <label class="sr-only" for="comment-edit-text">Text</label>
-                              <textarea id="comment-edit-text" class="form-control" name="comment[text]" placeholder="Your comment text..." rows="5" autofocus required><%= comment.text %></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-outline-warning btn-sm">Edit Comment <i class="fas fa-comment" aria-hidden="true"></i></button> 
-                          </form>
-                        </div>
-                      </div>
-                      
-                    <% } %>
-                  </div>
-                </div>
+      <!--REVIEW SECTION START--> 
+      <div class="card p-3 my-3 shadow-sm">
+        <% if (landscape.rating !== 0) { %>
+          <h5 class="border-bottom border-gray pb-2 mb-0">Lastest reviews <i class="far fa-star"></i></h5>
+          <% landscape.reviews.slice(0, 5).forEach(review => { %>
+            <div class="media text-muted pt-3">
+              <div class="mr-3">
+                <%- '<i class="fas fa-star checked"></i>'.repeat(review.rating) %><%- '<i class="fas fa-star"></i>'.repeat(5 - review.rating) %>
               </div>
-            <% }); %>
-          </div> 
+              <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                  <strong class="text-gray-dark"><%= review.text %></strong>                     
+                  <%= moment(review.updatedAt).fromNow() %>
+                </div>
+                <span class="d-block">Review by: <strong><%= review.author.username %></strong></span>
+                <% if(currentUser && review.author._id.equals(currentUser._id)){ %>
+                  <div class="btn-group mt-2">
+                    <!--Edit button used for collapsing the edit comment form-->
+                    <a class="btn btn-xs btn-outline-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= review._id %>" aria-expanded="false" aria-controls="collapse<%= review._id %>">Edit</a>
+                    <!-- Delete review button -->
+                    <button type="button" class="btn btn-xs btn-outline-danger" data-toggle="modal" data-target="#modalDelete<%= review._id %>">Delete</button>
+                  </div>
+
+                  <!--Modal Delete Comment Start-->
+                  <div class="modal fade" id="modalDelete<%= review._id %>" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel<%= review._id %>" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="modalDeleteLabel<%= review._id %>">Delete Review</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Do you want to delete the review?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <form action="/landscapes/<%= landscape._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>  
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--Modal Delete Comment End-->
+                  <!--Collapse EDIT Review Form START-->
+                  <div class="collapse mt-3" id="collapseEdit<%= review._id %>">
+                    <div class="card card-body border-left-warning">
+                      <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Edit Review</h6>         
+                      <form action="/landscapes/<%= landscape._id %>/reviews/<%= review._id %>?_method=PUT" method="POST">
+                        <div class="stars mx-auto">
+                          <input class="star star-5" id="star-5" type="radio" name="review[rating]" value="5" <%= review.rating === 5 ? 'checked' : '' %>>
+                          <label class="star star-5" for="star-5"></label>
+                          <input class="star" id="star-4" type="radio" name="review[rating]" value="4" <%= review.rating === 4 ? 'checked' : '' %>>
+                          <label class="star" for="star-4"></label>
+                          <input class="star" id="star-3" type="radio" name="review[rating]" value="3" <%= review.rating === 3 ? 'checked' : '' %>>
+                          <label class="star" for="star-3"></label>
+                          <input class="star" id="star-2" type="radio" name="review[rating]" value="2" <%= review.rating === 2 ? 'checked' : '' %>>
+                          <label class="star" for="star-2"></label>
+                          <input class="star star-1" id="star-1" type="radio" name="review[rating]" value="1" <%= review.rating === 1 ? 'checked' : '' %>>
+                          <label class="star star-1" for="star-1"></label>
+                        </div>
+                        <div class="form-group">
+                          <label class="sr-only" for="review-new-text">Text</label>
+                          <textarea id="review-new-text" class="form-control" name="review[text]" placeholder="Write your review..." rows="5" autofocus><%= review.text %></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-warning btn-sm">Edit review <i class="far fa-check-circle"></i></button>             
+                      </form>
+                    </div>
+                  </div>
+                  <!--Collapse EDIT Review Form END-->
+                <% } %>
+              </div>
+            </div>       
+          <% }); %>
+        <% } %>
+        <div class="d-flex justify-content-between align-items-center w-100 mt-3">
+          <a href="/landscapes/<%= landscape._id %>/reviews"><i class="fa fa-search" aria-hidden="true"></i> See all reviews</a>
+          <% if ( currentUser && !landscape.reviews.some(review => { return review.author._id.equals(currentUser._id) })) { %>
+            <a class="btn btn-outline-primary btn-sm new-button" role="button" data-toggle="collapse" href="#collapseReview" aria-expanded="false" aria-controls="collapseReview">
+              <i class="fas fa-plus" aria-hidden="true"></i> Write a New Review</a>
+          <% } %>
+        </div> 
+
+        <!--Collapse Add Review Form START-->
+        <div class="collapse mt-3" id="collapseReview">
+          <div class="card card-body border-left-primary">
+            <!--If the user is logged in, show the new review form-->
+            <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Add Review</h6>         
+            <form action="/landscapes/<%= landscape._id %>/reviews" method="POST">
+              <div class="stars mx-auto">
+                <input class="star star-5" id="star-5" type="radio" name="rating" value="5">
+                <label class="star star-5" for="star-5"></label>
+                <input class="star" id="star-4" type="radio" name="rating" value="4">
+                <label class="star" for="star-4"></label>
+                <input class="star" id="star-3" type="radio" name="rating" value="3">
+                <label class="star" for="star-3"></label>
+                <input class="star" id="star-2" type="radio" name="rating" value="2">
+                <label class="star" for="star-2"></label>
+                <input class="star star-1" id="star-1" type="radio" name="rating" value="1">
+                <label class="star star-1" for="star-1"></label>
+              </div>
+              <div class="form-group">
+                <label class="sr-only" for="review-new-text">Text</label>
+                <textarea id="review-new-text" class="form-control" name="text" placeholder="Write your review..." rows="5" autofocus></textarea>
+              </div>
+              <button type="submit" class="btn btn-outline-primary btn-sm">Submit review <i class="far fa-check-circle"></i></button>             
+            </form>
+          </div>
         </div>
-      </div>   
+        <!--Collapse Add Review Form END-->     
+      </div>
+      <!--REVIEW SECTION END--> 
+
+      <!--COMMENT SECTION START-->
+      <div class="card p-3 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center w-100 border-bottom border-gray pb-3">
+          <!--Comment section title-->
+          <h5 id="comment-header" class="mb-0">Comments <i class="far fa-comment-dots"></i></h5>
+          <a class="btn btn-outline-success btn-sm new-button" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment">
+            <i class="fas fa-plus" aria-hidden="true"></i> Add New Comment</a>
+        </div>
+
+        <!--Collapse Add Comment Form START-->
+        <div class="collapse" id="collapseComment">
+          <div class="card card-body border-left-success">
+            <% if(!currentUser) { %>
+              <!--If the user is not logged in, direct him to the login page-->
+              <h6 class="text-secondary">Please login to write comment. <a href="/login">Click here</a> to go to the login page.</h6>
+            <% } else { %>
+              <!--If the user is logged in, show the new comment form-->
+              <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Write Comment</h6>
+              <form action="/landscapes/<%= landscape._id %>/comments" method="POST">
+                <div class="form-group">
+                  <label class="sr-only" for="comment-new-text">Text</label>
+                  <textarea id="comment-new-text" class="form-control" name="text" placeholder="Write your comment..." rows="5" autofocus required></textarea>
+                </div>
+                <button type="submit" class="btn btn-outline-success btn-sm">Comment <i class="fas fa-comment" aria-hidden="true"></i></button>              
+              </form>
+            <% } %>
+          </div>
+        </div>
+        <!--Collapse Add Comment Form END-->
+
+        <!--Check if there are comments, if there are none say no comments.-->
+        <% if (landscape.comments.length === 0) { %>
+          <p class="font-italic text-muted mt-2">No comments yet.</p>
+        <% } else { %>
+          <!--Display comments by looping through them-->
+          <% landscape.comments.forEach(comment => { %>
+            <div class="media text-muted pt-3">
+              <img src="<%= comment.author.avatar.content %>" alt="User Avatar" class="mr-2 rounded" width="32" height="32">
+              <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                  <strong class="text-gray-dark"><a href="/users/<%= comment.author._id %>"><%= comment.author.username %></a></strong>
+                  <%= moment(comment.updatedAt).fromNow() %>
+                </div>
+                <span class="d-block mt-1"><strong><%= comment.text %></strong></span>
+
+                <!--If the visitor is logged in and the owner of the comment or is admin, show the edit and delete buttons-->
+                <% if(currentUser && comment.author._id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
+                  <div class="btn-group mt-2" role="group" aria-label="Options">
+                    <!--Edit button used for collapsing the edit comment form-->
+                    <a class="btn btn-xs btn-outline-warning" role="button" data-toggle="collapse" href="#collapseEdit<%= comment._id %>" aria-expanded="false" aria-controls="collapse<%= comment._id %>">Edit</a>
+                    <!--Delete comment button-->
+                    <button type="button" class="btn btn-xs btn-outline-danger" data-toggle="modal" data-target="#modalDelete<%= comment._id %>">Delete</button>
+                  </div>
+                    
+                  <!--Modal Delete Comment Start-->
+                  <div class="modal fade" id="modalDelete<%= comment._id %>" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel<%= comment._id %>" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="modalDeleteLabel<%= comment._id %>">Delete Comment</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Do you want to delete the comment?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <form action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>  
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--Modal Delete Comment End-->        
+                  <!--Edit Comment Form Start-->
+                  <div class="collapse mt-2" id="collapseEdit<%= comment._id %>">
+                    <div class="card card-body border-left-warning">
+                      <h6 class="text-secondary mb-3"><i class="fas fa-pencil-alt"></i> Edit Comment</h6>
+                      <form id="edit-comment-form<%= comment._id %>" action="/landscapes/<%= landscape._id %>/comments/<%= comment._id %>?_method=PUT" method="POST">
+                        <div class="form-group">
+                          <label class="sr-only" for="comment-edit-text">Text</label>
+                          <textarea id="comment-edit-text" class="form-control" name="comment[text]" placeholder="Your comment text..." rows="5" autofocus required><%= comment.text %></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-warning btn-sm">Edit Comment <i class="fas fa-comment" aria-hidden="true"></i></button> 
+                      </form>
+                    </div>
+                  </div>   
+                  <!--Edit Comment Form End-->
+                <% } %> 
+              </div>
+            </div>             
+          <% }); %>
+        <% } %>               
+      </div>
+      <!--COMMENT SECTION END-->
     </div>
   </div>
 </div>
 
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet'/>
 <script async defer>
   mapboxgl.accessToken = '<%= key %>';
   
-  let map = new mapboxgl.Map({
+  const map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
     center: ['<%= landscape.lng %>', '<%= landscape.lat %>'], // starting position [lng, lat]
     zoom: 8 // starting zoom
   });
   
-  let marker = new mapboxgl.Marker({
+  const marker = new mapboxgl.Marker({
     color: '#3bb2d0',
   });
   
-  let popUp = new mapboxgl.Popup({
+  const popUp = new mapboxgl.Popup({
     offset: 25
   });
   
-  popUp.setHTML('<h5><%= landscape.name %></h5>'+'<p class="text-muted"><%= landscape.location %></p>');
+  popUp.setHTML(`<h5><%= landscape.name %></h5><p class="text-muted"><%= landscape.location %></p>`);
   marker.setLngLat(map.getCenter());
   marker.setPopup(popUp);
   marker.addTo(map);
 </script>
+
 <% include ../partials/footer %>

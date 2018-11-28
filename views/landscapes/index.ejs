@@ -18,8 +18,24 @@
         <div class="col-lg-3 col-md-4 col-sm-6">
           <div class="card mb-4 shadow-sm">
             <img class="card-img-top" src="<%= landscape.image.content %>" alt="<%= landscape.name %>">
+            <div class="position-absolute w-100">
+              <div class="float-left m-2 text-dark">
+                <i class="far fa-comment-dots"></i> <small><%= landscape.comments.length %></small>
+              </div>
+            </div>
             <div class="card-body">
               <h5 class="card-title"><%= landscape.name %></h5>
+              <div class="mb-3">
+                <% if (landscape.rating === 0) { %>
+                  <h6 class="card-subtitle text-muted font-weight-light font-italic">No reviews yet.</h6>
+                <% } else { %>
+                  <i class="fas fa-star checked"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 1.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 2.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 3.5) ? 'checked' : '' %>"></i>
+                  <i class="fas fa-star <%= (landscape.rating > 4.5) ? 'checked' : '' %>"></i>
+                <% } %>
+              </div>
               <div class="d-flex justify-content-between align-items-center">
                 <a href="/landscapes/<%= landscape._id %>" class="btn btn-sm btn-outline-info"><i class="fas fa-info-circle"></i> More Info</a>
                 <small class="text-muted"><%= moment(landscape.createdAt).fromNow() %></small>

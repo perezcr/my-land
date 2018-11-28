@@ -6,7 +6,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/5.1.1/bootstrap-social.min.css">
    <link rel="stylesheet" href="/stylesheets/style.css">
    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -36,7 +36,11 @@
             </li>
           <% } else{ %>
             <li class="nav-item">
-              <a class="nav-link" href="/users/<%= currentUser._id %>">Hi, <strong><%= currentUser.username %></strong></a>
+              <% if (currentUser.isAdmin) { %>
+                <a class="nav-link text-primary" href="/users/<%= currentUser._id %>">Hi, <strong><%= currentUser.username %> (Administrator)</strong></a>
+              <% } else { %>
+                <a class="nav-link" href="/users/<%= currentUser._id %>">Hi, <strong><%= currentUser.username %></strong></a>
+              <% } %>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -49,14 +53,14 @@
                 <% if(notifications.length) { %>
                   <% notifications.forEach((notification) => { %>
                     <a class="dropdown-item d-flex" href="/users/<%= currentUser._id %>/notifications/<%= notification._id %>">
-                      <img class="align-self-start mr-3" src="<%= notification.avatar %>" alt="<%= notification.username %>" width="50px" height="50px">
+                      <img class="align-self-start mr-3" src="<%= notification.user.avatar.content %>" alt="<%= notification.user.username %>" width="50px" height="50px">
                       <div class="media-body">
                         <% const message = {
                           'Landscape' : 'created a new landscape.',
                           'Comment' : 'commented your landscape.',
                           'Follow' : 'started following you.'
                         }; %>
-                        <p class="text-dark m-0"><strong><%= notification.username %></strong> <%= message[notification.type] %></p>
+                        <p class="text-dark m-0"><strong><%= notification.user.username %></strong> <%= message[notification.type] %></p>
                         <p class="text-muted m-0"><small><i><%= moment(notification.createdAt).fromNow() %></i></small></p>
                       </div>
                     </a>
@@ -83,21 +87,25 @@
       </div>
     </div>
   </nav>
-  <div class="container position-relative">
+  <div class="position-relative">
     <% if(success.length > 0){ %>
-      <div class="alert alert-success alert-dismissible fade show position-absolute w-100 mt-2" role="alert">
-        <%= success %>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+      <% success.forEach(message => { %>
+        <div class="alert alert-success alert-dismissible fade show w-100 m-0" role="alert">
+          <%= message %>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <% }); %>
     <% } %>
     <% if(error.length > 0){ %>
-      <div class="alert alert-danger alert-dismissible fade show position-absolute w-100 mt-2" role="alert">
-        <%= error %>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+      <% error.forEach(message => { %>
+        <div class="alert alert-danger alert-dismissible fade show w-100 m-0" role="alert">
+          <%= message %>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <% }); %>
     <% } %> 
   </div>
