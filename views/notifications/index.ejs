@@ -1,32 +1,31 @@
 <% include ../partials/header %>
 <div class="container">
-  <div class="row mt-4 col-12">
-    <h4 class="text-dark">Your Notifications</h4>   
-  </div>
-  <div class="row my-3">
+  <div class="row my-4">
     <div class="col-12">
-      <div class="card">
-        <ul class="card-body">
-          <% if(notificationsList.length) { %>
-            <% notificationsList.forEach(notification => { %>
-              <a class="dropdown-item d-flex" href="/users/<%= currentUser._id %>/notifications/<%= notification._id %>">
-                <img class="align-self-start mr-3" src="<%= notification.avatar %>" alt="<%= notification.username %>" width="60px">
-                <div class="media-body">
-                  <% const message = {
-                    'Landscape' : 'created a new landscape.',
-                    'Comment' : 'commented your landscape.',
-                    'Follow' : 'started following you.'
-                  }; %>
-                  <h6 class="text-dark"><strong><%= notification.username %></strong> <%= message[notification.type] %></h6>               
-                  <h6 class="text-muted"><small><i><%= moment(notification.createdAt).fromNow() %></i></small></h6>
-                </div>
-              </a>
-              <div class="dropdown-divider"></div>
-            <% }); %>
-          <% } else{ %>
-            <h5 class="text-muted text-center"><i>No notifications yet.</i></h5>
-          <% } %>
-        </ul>
+      <h4 class="text-dark mb-3">Your Notifications</h4>
+      <div class="card p-3 shadow-sm">
+        <% if(notificationsList.length) { %>
+          <% notificationsList.forEach(notification => { %>
+            <a class="dropdown-item d-flex" href="/users/<%= currentUser._id %>/notifications/<%= notification._id %>">
+              <img class="align-self-start mr-3" src="<%= notification.user.avatar.content %>" alt="<%= notification.user.username %>" width="60px">
+              <div class="media-body">
+                <% const message = {
+                  'Landscape' : 'created a new landscape.',
+                  'Comment' : 'commented your landscape.',
+                  'Follow' : 'started following you.'
+                }; %>
+                <h6 class="text-dark m-0"><strong><%= notification.user.username %></strong> <%= message[notification.type] %></h6>
+                <p class="text-muted font-italic small-text"><%= moment(notification.createdAt).fromNow() %></p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+          <% }); %>
+        <% } else{ %>
+          <h5 class="text-muted text-center font-italic">No notifications yet.</h5>
+        <% } %>
+        <div class="d-flex justify-content-between align-items-center w-100 mt-3">
+          <a class="btn btn-outline-danger btn-sm" href="/landscapes"><i class="fas fa-chevron-circle-left"></i> Go back</a>
+        </div>
       </div>
     </div>
   </div>
