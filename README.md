@@ -4,7 +4,7 @@
 
 ## Live Demo
 
-Check out the [live application here](https://mylandweb.herokuapp.com/)
+Check out the [live application here.](https://mylandweb.herokuapp.com/)
 
 ## Covered Concepts
 
