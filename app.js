@@ -1,5 +1,7 @@
 const express = require('express');
 const session = require('express-session');
+const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo')(session);
 const path = require('path');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
@@ -41,7 +43,6 @@ app.use(methodOverride('_method'));
 
 // The flash middleware let's us use req.flash('error', 'Shit!'), which will then pass that message to the next page the user requests
 // The message don't persist on every single request, it's only one time, for this reason is called flash
-// Note about flash
 // res.redirect()
 //    req.flash('info', 'Flash is back!')
 //    res.redirect('/');
@@ -53,8 +54,10 @@ app.use(flash());
 // This keeps users logged in and allows us to send flash messages
 app.use(session({
   secret: process.env.SECRET,
+  key: process.env.KEY,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
 })); 
 
 // Passport JS is what we use to handle our logins
